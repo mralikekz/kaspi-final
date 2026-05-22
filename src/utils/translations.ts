@@ -534,6 +534,15 @@ export const TRANSLATIONS: Record<string, Record<KaspiLang, string>> = {
     AR: "تسجيل الدخول مع Pi Network",
     HI: "Pi Network से प्रमाणित करें",
     ES: "Autenticarse con Pi Network"
+  },
+  piBrowserRequired: {
+    RU: "Разблокировка premium-прогнозов доступна только внутри официального Pi Browser. Пожалуйста, откройте это приложение внутри Pi Browser!",
+    EN: "Unlocking premium forecasts is only supported inside the official Pi App Browser. Please open this application inside your Pi Browser!",
+    ZH: "解锁高级预测功能仅在官方 Pi 浏览器中受支持。请在您的 Pi 浏览器中打开此应用！",
+    FR: "Le déverrouillage des prévisions premium est uniquement pris en charge dans l'application officielle Pi Browser. Veuillez ouvrir cette application dans votre Pi Browser !",
+    AR: "إلغاء قفل التوقعات المميزة مدعوم فقط داخل تطبيق Pi Browser الرسمي. يرجى فتح هذا التطبيق داخل متصفح Pi!",
+    HI: "प्रीमियम पूर्वानुमानों को अनलॉक करना केवल आधिकारिक Pi ब्राउज़र के भीतर समर्थित है। कृपया इस एप्लिकेशन को अपने Pi ब्राउज़र के भीतर खोलें!",
+    ES: "El acceso a los pronósticos premium solo está disponible utilizando el navegador oficial de Pi Browser. ¡Por favor abra esta aplicación dentro de su Pi Browser!"
   }
 };
 
