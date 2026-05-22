@@ -18,10 +18,10 @@ app.get("/validation-key.txt", (req, res) => {
   res.setHeader("Content-Type", "text/plain");
   const key = process.env.PI_VALIDATION_KEY;
   if (!key) {
-    res.status(500).send("Error: PI_VALIDATION_KEY is not configured in the environment settings.");
+    res.status(404).send("Error: PI_VALIDATION_KEY is not configured in the server environment variables.");
     return;
   }
-  res.send(key);
+  res.send(key.trim());
 });
 
 // Initialize Gemini API
@@ -388,8 +388,7 @@ const getPiApiKey = (): string | undefined => {
          process.env.PI_KEY || 
          process.env.MINEPI_API_KEY || 
          process.env.MINEPI_KEY || 
-         process.env.MINEPI_SERVER_KEY ||
-         "8rhklalt9kcx5vtqftsnfrgbdzcoxm3piq1ab5zktuszarehxuk5xeit9yzpagae";
+         process.env.MINEPI_SERVER_KEY;
 };
 
 // Diagnostics logger to record Pi API handshakes in memory
