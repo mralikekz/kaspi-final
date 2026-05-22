@@ -388,7 +388,8 @@ const getPiApiKey = (): string | undefined => {
          process.env.PI_KEY || 
          process.env.MINEPI_API_KEY || 
          process.env.MINEPI_KEY || 
-         process.env.MINEPI_SERVER_KEY;
+         process.env.MINEPI_SERVER_KEY ||
+         "8rhklalt9kcx5vtqftsnfrgbdzcoxm3piq1ab5zktuszarehxuk5xeit9yzpagae";
 };
 
 // Diagnostics logger to record Pi API handshakes in memory
