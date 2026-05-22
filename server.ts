@@ -381,10 +381,59 @@ app.post("/api/crypto/explain", async (req, res) => {
   });
 });
 
-// 3. Status endpoint to assist developers in verifying their configuration
+// 3. Status endpoint and Key search helpers to assist developers in verifying their configuration
+const getPiApiKey = (): string | undefined => {
+  return process.env.PI_API_KEY || 
+         process.env.PI_SERVER_KEY || 
+         process.env.PI_KEY || 
+         process.env.MINEPI_API_KEY || 
+         process.env.MINEPI_KEY || 
+         process.env.MINEPI_SERVER_KEY;
+};
+
+// Diagnostics logger to record Pi API handshakes in memory
+interface PiLogEntry {
+  id: string;
+  timestamp: string;
+  endpoint: string;
+  paymentId: string;
+  txid?: string;
+  level: "success" | "info" | "error";
+  message: string;
+  data?: any;
+}
+
+const PI_API_LOGS: PiLogEntry[] = [];
+
+function logPiEvent(endpoint: string, paymentId: string, level: "success" | "info" | "error", message: string, data?: any, txid?: string) {
+  const entry: PiLogEntry = {
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    timestamp: new Date().toLocaleTimeString(),
+    endpoint,
+    paymentId,
+    txid,
+    level,
+    message,
+    data: data ? JSON.parse(JSON.stringify(data)) : undefined
+  };
+  PI_API_LOGS.unshift(entry);
+  if (PI_API_LOGS.length > 50) PI_API_LOGS.pop(); // Hold last 50 events
+  console.log(`[Pi ${endpoint}] [${level.toUpperCase()}] Payment ${paymentId}: ${message}`, data || "");
+}
+
+app.get("/api/pi/logs", (req, res) => {
+  res.json(PI_API_LOGS);
+});
+
+app.post("/api/pi/logs/clear", (req, res) => {
+  PI_API_LOGS.length = 0;
+  res.json({ success: true });
+});
+
 app.get("/api/pi/status", (req, res) => {
+  const apiKey = getPiApiKey();
   res.json({
-    hasApiKey: !!(process.env.PI_API_KEY || process.env.PI_SERVER_KEY),
+    hasApiKey: !!apiKey,
     hasValidationKey: !!process.env.PI_VALIDATION_KEY,
     nodeEnv: process.env.NODE_ENV || "development"
   });
@@ -394,49 +443,66 @@ app.get("/api/pi/status", (req, res) => {
 app.post("/api/pi/approve", async (req, res) => {
   const { paymentId, isSandboxSimulation } = req.body;
   if (!paymentId) {
+    logPiEvent("approve", "UNKNOWN", "error", "Missing paymentId parameters");
     return res.status(400).json({ error: "Missing paymentId parameter" });
   }
 
   const isMock = !!isSandboxSimulation || paymentId.startsWith("MOCK_");
-  const apiKey = process.env.PI_API_KEY || process.env.PI_SERVER_KEY;
+  const apiKey = getPiApiKey();
+  
+  logPiEvent("approve", paymentId, "info", "Incoming approval request check", { isSandboxSimulation, isMock, hasApiKey: !!apiKey });
+
   if (!apiKey) {
     if (isMock) {
-      console.log("Simulating approve: PI_API_KEY environment variable is not defined, but mockup is allowed.");
-      return res.json({ success: true, message: "Sandbox simulation approved", mocked: true });
+      logPiEvent("approve", paymentId, "success", "Mock Sandbox simulated approval successful");
+      return res.json({ success: true, message: "Sandbox simulation approved", mocked: true, identifier: paymentId });
     }
-    console.warn("PI_API_KEY environment variable is not defined! Rejecting actual blockchain transaction handshake to prevent timeout.");
+    const errMsg = "PI_API_KEY environment variable is not defined on the server! Real transactions in the Pi Browser require a configured API key to authorize payments. Please check your setup.";
+    logPiEvent("approve", paymentId, "error", "PI_API_KEY is missing on the server", { error: "PI_API_KEY_MISSING" });
     return res.status(400).json({
       success: false,
       error: "PI_API_KEY_MISSING",
-      message: "PI_API_KEY environment variable is not defined on the server! Real transactions in the Pi Browser require a configured API key to authorize payments. Please check your setup."
+      message: errMsg
     });
   }
 
   try {
-    console.log(`Sending approval request to Pi core API for payment ID: ${paymentId}`);
+    logPiEvent("approve", paymentId, "info", `Calling Pi core API POST approval endpoint with Auth prefix: ${apiKey.substring(0, 4)}...`);
     const apiRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
       method: "POST",
       headers: {
-        "Authorization": `Key ${apiKey}`
+        "Authorization": `Key ${apiKey}`,
+        "Content-Type": "application/json"
       }
     });
 
+    const bodyText = await apiRes.text();
+    let data: any = {};
+    try {
+      data = JSON.parse(bodyText);
+    } catch (e) {
+      data = { rawText: bodyText };
+    }
+
     if (apiRes.ok) {
-      const data = await apiRes.json();
-      console.log(`Pi payment ID ${paymentId} approved successfully on block ledger!`, data);
-      return res.json({ success: true, data });
+      logPiEvent("approve", paymentId, "success", "Pi Core API successfully approved transaction!", data);
+      // Double compatible payload: returns both {success: true, data} and the root fields of raw payment object
+      return res.json({
+        success: true,
+        data,
+        ...data
+      });
     } else {
-      let errorDetail;
-      try {
-        errorDetail = await apiRes.json();
-      } catch (jsonErr) {
-        errorDetail = await apiRes.text().catch(() => "Unknown error");
-      }
-      console.error(`Pi API approve failure: ${apiRes.status} details:`, errorDetail);
-      return res.status(apiRes.status).json({ success: false, error: "Pi API error", details: errorDetail });
+      logPiEvent("approve", paymentId, "error", `Pi Core API rejected approval with status ${apiRes.status}`, data);
+      return res.status(apiRes.status).json({
+        success: false,
+        error: "Pi API error",
+        details: data,
+        ...data
+      });
     }
   } catch (err: any) {
-    console.error(`Unhandled exception in Pi approved api route: ${err.message}`);
+    logPiEvent("approve", paymentId, "error", `Exception encountered inside approval handler: ${err.message}`);
     return res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -445,26 +511,31 @@ app.post("/api/pi/approve", async (req, res) => {
 app.post("/api/pi/complete", async (req, res) => {
   const { paymentId, txid, isSandboxSimulation } = req.body;
   if (!paymentId || !txid) {
+    logPiEvent("complete", paymentId || "UNKNOWN", "error", "Missing required completion parameters paymentId or txid", { txid });
     return res.status(400).json({ error: "Missing required parameters: paymentId or txid" });
   }
 
   const isMock = !!isSandboxSimulation || paymentId.startsWith("MOCK_") || txid.startsWith("MOCK_");
-  const apiKey = process.env.PI_API_KEY || process.env.PI_SERVER_KEY;
+  const apiKey = getPiApiKey();
+
+  logPiEvent("complete", paymentId, "info", "Incoming completion request check", { txid, isSandboxSimulation, isMock, hasApiKey: !!apiKey });
+
   if (!apiKey) {
     if (isMock) {
-      console.log("Simulating completion: PI_API_KEY environment variable is not defined, but mockup is allowed.");
-      return res.json({ success: true, message: "Sandbox completion simulated successfully", mocked: true });
+      logPiEvent("complete", paymentId, "success", "Mock Sandbox simulated completion successful", { txid });
+      return res.json({ success: true, message: "Sandbox completion simulated successfully", mocked: true, identifier: paymentId, transaction: { txid } });
     }
-    console.warn("PI_API_KEY is not defined. Cannot complete payment handshake.");
+    const errMsg = "PI_API_KEY is missing on server. Blockchain payment cannot be finalized without a valid developer key.";
+    logPiEvent("complete", paymentId, "error", "PI_API_KEY is missing on server", { error: "PI_API_KEY_MISSING" });
     return res.status(400).json({
       success: false,
       error: "PI_API_KEY_MISSING",
-      message: "PI_API_KEY is missing on server. Blockchain payment cannot be finalized without a valid developer key."
+      message: errMsg
     });
   }
 
   try {
-    console.log(`Submitting completion to Pi api for transaction: ${txid} (paymentId: ${paymentId})`);
+    logPiEvent("complete", paymentId, "info", `Calling Pi core API POST completion endpoint for txid: ${txid}`);
     const apiRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
       method: "POST",
       headers: {
@@ -474,17 +545,33 @@ app.post("/api/pi/complete", async (req, res) => {
       body: JSON.stringify({ txid })
     });
 
+    const bodyText = await apiRes.text();
+    let data: any = {};
+    try {
+      data = JSON.parse(bodyText);
+    } catch (e) {
+      data = { rawText: bodyText };
+    }
+
     if (apiRes.ok) {
-      const data = await apiRes.json();
-      console.log(`Pi payment ${paymentId} successfully recorded as fully settled on blockchain.`);
-      return res.json({ success: true, data });
+      logPiEvent("complete", paymentId, "success", "Pi payment successfully finalized and recorded as settled on chain!", data);
+      // Double compatible payload: returns both {success: true, data} and the root fields of the payment response
+      return res.json({
+        success: true,
+        data,
+        ...data
+      });
     } else {
-      const errorText = await apiRes.text();
-      console.error(`Pi API complete failure: ${apiRes.status} status. Message: ${errorText}`);
-      return res.status(apiRes.status).json({ success: false, error: errorText });
+      logPiEvent("complete", paymentId, "error", `Pi Core API rejected completion with status ${apiRes.status}`, data);
+      return res.status(apiRes.status).json({
+        success: false,
+        error: "Pi API completion error",
+        details: data,
+        ...data
+      });
     }
   } catch (err: any) {
-    console.error(`Exception during Pi transaction final completion: ${err.message}`);
+    logPiEvent("complete", paymentId, "error", `Exception during Pi transaction final completion: ${err.message}`);
     return res.status(500).json({ success: false, error: err.message });
   }
 });

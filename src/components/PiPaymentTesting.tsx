@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Coins, ShieldAlert, BadgeCheck, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import { Coins, ShieldAlert, BadgeCheck, Sparkles, Loader2, ArrowRight, Terminal, Trash2, RefreshCw } from "lucide-react";
 import { KaspiLang } from "../types";
 import { getTranslation } from "../utils/translations";
 
@@ -22,10 +22,41 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
   const [sdkStatus, setSdkStatus] = useState<"not_detected" | "detected" | "authenticating" | "authenticated" | "error">("not_detected");
   const [logs, setLogs] = useState<Array<{ id: string; time: string; msg: string; type: "info" | "success" | "error" | "pending" }>>([]);
   const [serverConfig, setServerConfig] = useState<{ hasApiKey: boolean; hasValidationKey: boolean } | null>(null);
+  const [serverLogs, setServerLogs] = useState<Array<{ id: string; timestamp: string; endpoint: string; paymentId: string; txid?: string; level: "success" | "info" | "error"; message: string; data?: any }>>([]);
+  const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
 
   const addLog = (msg: string, type: "info" | "success" | "error" | "pending" = "info") => {
     const time = new Date().toLocaleTimeString();
     setLogs(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, time, msg, type }]);
+  };
+
+  useEffect(() => {
+    const fetchServerLogs = () => {
+      fetch("/api/pi/logs")
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setServerLogs(data);
+          }
+        })
+        .catch(err => {
+          console.warn("Could not retrieve server-side Pi logs:", err);
+        });
+    };
+
+    fetchServerLogs();
+    const interval = setInterval(fetchServerLogs, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleClearServerLogs = async () => {
+    try {
+      await fetch("/api/pi/logs/clear", { method: "POST" });
+      setServerLogs([]);
+      setSelectedLogId(null);
+    } catch (err) {
+      console.error("Failed to clear server logs:", err);
+    }
   };
 
   useEffect(() => {
@@ -344,7 +375,7 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
         </div>
 
         {/* Live Processing Action Console Log */}
-        <div className="w-full md:w-80 flex flex-col h-44 border border-slate-100 dark:border-zinc-800 rounded-xl bg-slate-50/50 dark:bg-zinc-950 overflow-hidden shrink-0">
+        <div className="w-full md:w-80 flex flex-col h-44 border border-slate-150 dark:border-zinc-800 rounded-xl bg-slate-50/50 dark:bg-zinc-950 overflow-hidden shrink-0">
           <div className="bg-slate-100 dark:bg-zinc-900 border-b border-slate-150 px-3 py-1.5 flex items-center justify-between">
             <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-500 font-mono">
               Pi Verification Ledger Status
@@ -374,6 +405,117 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
         </div>
 
       </div>
+
+      {/* Expanded diagnostic block of actual Server-to-Server Gateway handshake API logs */}
+      <div className="mt-5 border-t border-slate-150 dark:border-zinc-800 pt-5">
+        <div className="flex items-center justify-between mb-3.5">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded bg-purple-50 flex items-center justify-center dark:bg-purple-950/20">
+              <Terminal className="h-3.5 w-3.5 text-purple-650 dark:text-purple-400" />
+            </div>
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-zinc-300 font-sans">
+              {lang === "RU" ? "Диагностика API Рукопожатий (В реальном времени)" : "Blockchain API Handshake Logs (Real-Time)"}
+            </h4>
+          </div>
+          
+          {serverLogs.length > 0 && (
+            <button 
+              onClick={handleClearServerLogs}
+              className="flex items-center gap-1 px-2.5 py-1 rounded bg-slate-50 border border-slate-150 hover:bg-slate-100 text-[10px] font-bold text-slate-600 dark:bg-zinc-800/40 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-850 cursor-pointer transition-all font-mono"
+            >
+              <Trash2 className="h-3 w-3" />
+              {lang === "RU" ? "Очистить" : "Clear"}
+            </button>
+          )}
+        </div>
+
+        <p className="text-[11px] text-slate-500 dark:text-zinc-400 mb-3 font-medium">
+          {lang === "RU" 
+            ? "Здесь отображаются реальные логи обмена данными между Вашим сервером и официальными серверами Pi Network. Нажмите на лог, чтобы увидеть подробный JSON-ответ (помогает выявить недействительный API-ключ или истекший сеанс)."
+            : "This monitors communication between your backend and the official Pi App servers. Click any log entry below to debug live HTTP request payloads, error codes, and server response JSONs."}
+        </p>
+
+        {serverLogs.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-200 dark:border-zinc-800 p-5 text-center">
+            <p className="text-xs text-slate-400 dark:text-zinc-650 italic font-mono">
+              {lang === "RU" ? "Нет логов. Сделайте попытку оплаты в Pi Browser." : "No gateway logs registered yet. Trigger a payment inside your Pi Browser."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Logs List */}
+            <div className="border border-slate-150 dark:border-zinc-800 rounded-xl bg-slate-50/20 dark:bg-zinc-950/40 h-56 overflow-y-auto p-2.5 space-y-1.5 font-mono text-[10px] scrollbar-thin">
+              {serverLogs.map((log) => (
+                <div 
+                  key={log.id} 
+                  onClick={() => setSelectedLogId(log.id === selectedLogId ? null : log.id)}
+                  className={`p-2 rounded-lg border cursor-pointer transition-all transition-colors duration-150 ${
+                    selectedLogId === log.id 
+                      ? "border-purple-300 bg-purple-50/20 dark:border-purple-900/40 dark:bg-purple-950/10" 
+                      : "border-slate-100 bg-white/70 hover:bg-slate-50 dark:border-zinc-850 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/80"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 finish-row">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[8.5px] text-slate-400 shrink-0">{log.timestamp}</span>
+                      <span className={`px-1 rounded text-[8px] font-black uppercase ${
+                        log.endpoint === "approve" ? "bg-cyan-100 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-400" : "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-400"
+                      }`}>
+                        /{log.endpoint}
+                      </span>
+                    </div>
+                    <span className={`h-1.5 w-1.5 rounded-full ${
+                      log.level === "success" ? "bg-emerald-500" :
+                      log.level === "error" ? "bg-red-500" : "bg-blue-400"
+                    }`} />
+                  </div>
+                  <div className="font-bold text-slate-700 dark:text-zinc-350 mt-1 line-clamp-1 break-all">
+                    {log.message}
+                  </div>
+                  <div className="text-[9px] text-slate-400 dark:text-zinc-550 mt-0.5 flex justify-between">
+                    <span>ID: {log.paymentId.substring(0, 12)}...</span>
+                    {log.txid && <span className="text-purple-650 dark:text-purple-400 text-[8.5px]">Tx: {log.txid.substring(0, 8)}...</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Selected Log Inspector */}
+            <div className="border border-slate-150 dark:border-zinc-800 rounded-xl bg-slate-900 text-slate-200 dark:bg-zinc-950 p-3 h-56 flex flex-col font-mono text-[9px]">
+              <div className="border-b border-slate-750 pb-1.5 mb-2.5 flex items-center justify-between">
+                <span className="text-slate-400 uppercase font-bold text-[8.5px]">JSON DATA PAYLOAD</span>
+                {selectedLogId ? (
+                  <span className="text-purple-400 text-[7.5px] font-bold">LOG ID: {selectedLogId.split("-")[1]}</span>
+                ) : (
+                  <span className="text-slate-500 italic text-[7.5px]">select log to view details</span>
+                )}
+              </div>
+              <div className="flex-1 overflow-auto scrollbar-thin leading-normal select-text selection:bg-purple-900/50">
+                {selectedLogId ? (
+                  (() => {
+                    const log = serverLogs.find(l => l.id === selectedLogId);
+                    if (!log) return <span className="text-slate-500">Log entry not found anymore</span>;
+                    return (
+                      <pre className="whitespace-pre-wrap leading-tight text-emerald-400 dark:text-emerald-500">
+                        {JSON.stringify(log.data || { info: "No telemetry data object attached to this log entry" }, null, 2)}
+                      </pre>
+                    );
+                  })()
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-center text-slate-500 space-y-1">
+                    <Terminal className="h-5 w-5 text-slate-600 mb-1" />
+                    <p className="font-bold uppercase tracking-wider text-[8px]">Debugger Terminal Idle</p>
+                    <p className="max-w-[200px] text-[8px] leading-relaxed">
+                      {lang === "RU" ? "Нажмите на любой лог слева, чтобы изучить подробный отчет обмена" : "Click on any log record on the left pane to explore full exchange telemetry."}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
