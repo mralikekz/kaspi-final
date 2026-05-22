@@ -13,6 +13,17 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
+// Endpoint to verify app domain ownership for Pi Network
+app.get("/validation-key.txt", (req, res) => {
+  res.setHeader("Content-Type", "text/plain");
+  const key = process.env.PI_VALIDATION_KEY;
+  if (!key) {
+    res.status(500).send("Error: PI_VALIDATION_KEY is not configured in the environment settings.");
+    return;
+  }
+  res.send(key);
+});
+
 // Initialize Gemini API
 const geminiApiKey = process.env.GEMINI_API_KEY;
 let ai: GoogleGenAI | null = null;
