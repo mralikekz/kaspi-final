@@ -21,6 +21,7 @@ import { getTranslation } from "./utils/translations";
 import Header from "./components/Header";
 import CoinCard from "./components/CoinCard";
 import CoinDetailModal from "./components/CoinDetailModal";
+import PiPaymentTesting from "./components/PiPaymentTesting";
 
 const STATIC_COINS: CoinPriceInfo[] = [
   { symbol: "PI", name: "Pi Network", category: "Utility / Network Coin", price: 41.25, change24h: 1.45, marketCap: 0, volume24h: 3521040, lastUpdated: new Date().toISOString() },
@@ -231,6 +232,9 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* Transaction testing module to fulfill Developer Checklist Item 10 */}
+        <PiPaymentTesting lang={lang} />
 
         {/* Mobile search bar */}
         <div className="relative md:hidden">

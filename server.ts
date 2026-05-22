@@ -381,6 +381,83 @@ app.post("/api/crypto/explain", async (req, res) => {
   });
 });
 
+// 3. Pi payment server-side approval flow
+app.post("/api/pi/approve", async (req, res) => {
+  const { paymentId } = req.body;
+  if (!paymentId) {
+    return res.status(400).json({ error: "Missing paymentId parameter" });
+  }
+
+  const apiKey = process.env.PI_API_KEY || process.env.PI_SERVER_KEY;
+  if (!apiKey) {
+    console.warn("PI_API_KEY environment variable is not defined! Standard sandbox test mode is active.");
+    return res.json({ success: true, message: "Sandbox simulation approved", mocked: true });
+  }
+
+  try {
+    console.log(`Sending approval request to Pi core API for payment ID: ${paymentId}`);
+    const apiRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Key ${apiKey}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      console.log(`Pi payment ID ${paymentId} approved successfully on block ledger!`);
+      return res.json({ success: true, data });
+    } else {
+      const errorText = await apiRes.text();
+      console.error(`Pi API approve failure: ${apiRes.status} details: ${errorText}`);
+      return res.status(apiRes.status).json({ success: false, error: errorText });
+    }
+  } catch (err: any) {
+    console.error(`Unhandled exception in Pi approved api route: ${err.message}`);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4. Pi payment server-side completion flow
+app.post("/api/pi/complete", async (req, res) => {
+  const { paymentId, txid } = req.body;
+  if (!paymentId || !txid) {
+    return res.status(400).json({ error: "Missing required parameters: paymentId or txid" });
+  }
+
+  const apiKey = process.env.PI_API_KEY || process.env.PI_SERVER_KEY;
+  if (!apiKey) {
+    console.warn("PI_API_KEY is not defined. Sandbox test transaction simulated successfully.");
+    return res.json({ success: true, message: "Sandbox completion simulated successfully", mocked: true });
+  }
+
+  try {
+    console.log(`Submitting completion to Pi api for transaction: ${txid} (paymentId: ${paymentId})`);
+    const apiRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Key ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ txid })
+    });
+
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      console.log(`Pi payment ${paymentId} successfully recorded as fully settled on blockchain.`);
+      return res.json({ success: true, data });
+    } else {
+      const errorText = await apiRes.text();
+      console.error(`Pi API complete failure: ${apiRes.status} status. Message: ${errorText}`);
+      return res.status(apiRes.status).json({ success: false, error: errorText });
+    }
+  } catch (err: any) {
+    console.error(`Exception during Pi transaction final completion: ${err.message}`);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Setup Vite middleware / production serving
 async function bootstrap() {
   if (process.env.NODE_ENV !== "production") {

@@ -495,9 +495,45 @@ export const TRANSLATIONS: Record<string, Record<KaspiLang, string>> = {
     EN: "Sync issue detected",
     ZH: "检测到同步问题",
     FR: "Problème de synchronisation détecté",
-    AR: "تم اكتشاف مشكلة في المزامنة",
+    AR: "تم اكتشاف مشكلة в المزامنة",
     HI: "सिंक्रनाइज़ेशन समस्या का पता चला",
     ES: "Problema de sincronización detectado"
+  },
+  piTestTitle: {
+    RU: "Тестирование транзакций (Пункт 10)",
+    EN: "Transaction Testing (Step 10)",
+    ZH: "交易测试（第 10 步）",
+    FR: "Test de Transaction (Étape 10)",
+    AR: "اختبار المعاملات (الخطوة 10)",
+    HI: "लेनदेन परीक्षण (चरण 10)",
+    ES: "Prueba de Transacción (Paso 10)"
+  },
+  piTestDesc: {
+    RU: "Для закрытия 10-го пункта в Личном Кабинете разработчика Pi выберите количество монет и отправьте тестовый платеж непосредственно внутри Вашего приложения в Pi Browser.",
+    EN: "To complete Step 10 in the Pi Developer Portal, select the desired test amount and execute a real user-to-app payment inside the Pi Browser.",
+    ZH: "为了在 Pi 开发者后台关闭第 10 步，请选择测试金额并直接在 Pi 浏览器内的应用中发送测试付款。",
+    FR: "Pour fermer l'étape 10 dans la console développeur Pi, sélectionnez le montant et envoyez un paiement de test directement dans le Pi Browser.",
+    AR: "لإغلاق الخطوة 10 في لوحة مطور Pi، حدد قيمة الاختبار وأرسل دفعة مستخدم إلى تطبيق (User-to-App) مباشرة داخل متصفح Pi.",
+    HI: "Pi डेवलपर पोर्टल में चरण 10 को बंद करने के लिए, परीक्षण राशि का चयन करें और सीधे Pi ब्राउज़र के भीतर अपने एप्लिकेशन में परीक्षण भुगतान भेजें।",
+    ES: "Para completar el Paso 10 en la consola de desarrollador de Pi, seleccione la cantidad de prueba y envíe un pago de prueba de usuario a aplicación directamente dentro del Pi Browser."
+  },
+  btnPay: {
+    RU: "Отправить {amount} PI",
+    EN: "Send {amount} PI",
+    ZH: "发送 {amount} PI",
+    FR: "Envoyer {amount} PI",
+    AR: "إرسال {amount} PI",
+    HI: "{amount} PI भेजें",
+    ES: "Enviar {amount} PI"
+  },
+  btnAuth: {
+    RU: "Авторизоваться по Pi Network",
+    EN: "Authenticate with Pi Network",
+    ZH: "授权 Pi Network 账户",
+    FR: "S'authentifier avec Pi Network",
+    AR: "تسجيل الدخول مع Pi Network",
+    HI: "Pi Network से प्रमाणित करें",
+    ES: "Autenticarse con Pi Network"
   }
 };
 
