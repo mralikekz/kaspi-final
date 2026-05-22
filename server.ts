@@ -417,20 +417,23 @@ app.post("/api/pi/approve", async (req, res) => {
     const apiRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
       method: "POST",
       headers: {
-        "Authorization": `Key ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({})
+        "Authorization": `Key ${apiKey}`
+      }
     });
 
     if (apiRes.ok) {
       const data = await apiRes.json();
-      console.log(`Pi payment ID ${paymentId} approved successfully on block ledger!`);
+      console.log(`Pi payment ID ${paymentId} approved successfully on block ledger!`, data);
       return res.json({ success: true, data });
     } else {
-      const errorText = await apiRes.text();
-      console.error(`Pi API approve failure: ${apiRes.status} details: ${errorText}`);
-      return res.status(apiRes.status).json({ success: false, error: errorText });
+      let errorDetail;
+      try {
+        errorDetail = await apiRes.json();
+      } catch (jsonErr) {
+        errorDetail = await apiRes.text().catch(() => "Unknown error");
+      }
+      console.error(`Pi API approve failure: ${apiRes.status} details:`, errorDetail);
+      return res.status(apiRes.status).json({ success: false, error: "Pi API error", details: errorDetail });
     }
   } catch (err: any) {
     console.error(`Unhandled exception in Pi approved api route: ${err.message}`);

@@ -111,7 +111,8 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
         addLog("🎉 PERFECT! Core Pi Core API validated and finalized payment! Step 10 completed!", "success");
         setStatusMessage("validated");
       } else {
-        addLog(`Ledger finalization failed: ${data.error || "Verification issue"} ${data.message || ""}`, "error");
+        const detailStr = data.details ? (typeof data.details === "object" ? JSON.stringify(data.details) : data.details) : "";
+        addLog(`Ledger finalization failed: ${data.error || "Verification issue"}. ${data.message || ""} ${detailStr}`, "error");
         setStatusMessage("error");
       }
     } catch (err: any) {
@@ -187,7 +188,8 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
             if (result.success) {
               addLog("Payment approved by server! Prompting Pioneer blockchain transaction signing...", "success");
             } else {
-              addLog(`Pi Core API server approval failed: ${result.error || "Unknown server code"}. ${result.message || ""}`, "error");
+              const detailStr = result.details ? (typeof result.details === "object" ? JSON.stringify(result.details) : result.details) : "";
+              addLog(`Pi Core API server approval failed: ${result.error || "Unknown error"}. ${result.message || ""} ${detailStr}`, "error");
               setStatusMessage("error");
             }
           } catch (err: any) {
