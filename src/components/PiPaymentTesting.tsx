@@ -21,6 +21,7 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
   const [amount, setAmount] = useState<number>(0.1);
   const [sdkStatus, setSdkStatus] = useState<"not_detected" | "detected" | "authenticating" | "authenticated" | "error">("not_detected");
   const [logs, setLogs] = useState<Array<{ id: string; time: string; msg: string; type: "info" | "success" | "error" | "pending" }>>([]);
+  const [serverConfig, setServerConfig] = useState<{ hasApiKey: boolean; hasValidationKey: boolean } | null>(null);
 
   const addLog = (msg: string, type: "info" | "success" | "error" | "pending" = "info") => {
     const time = new Date().toLocaleTimeString();
@@ -28,6 +29,21 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
   };
 
   useEffect(() => {
+    // Audit backend key configurations
+    fetch("/api/pi/status")
+      .then(res => res.json())
+      .then(data => {
+        setServerConfig(data);
+        if (!data.hasApiKey) {
+          addLog("⚠️ SERVER WARNING: PI_API_KEY is not defined in backend secrets! Real transactions will fail with 'Payment Expired'. Please supply your key to continue.", "error");
+        } else {
+          addLog("✅ Verified: Server backend has official PI_API_KEY configured and ready.", "success");
+        }
+      })
+      .catch(err => {
+        console.warn("Could not retrieve server Pi configuration status:", err);
+      });
+
     if (typeof window !== "undefined") {
       // Small timeout to let script tag fully resolve in Pi Browser sandboxes
       const timer = setTimeout(() => {
@@ -87,7 +103,7 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
       const res = await fetch("/api/pi/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId: payId, txid: transactionId })
+        body: JSON.stringify({ paymentId: payId, txid: transactionId, isSandboxSimulation: !window.Pi })
       });
       const data = await res.json();
       if (data.success) {
@@ -95,7 +111,7 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
         addLog("🎉 PERFECT! Core Pi Core API validated and finalized payment! Step 10 completed!", "success");
         setStatusMessage("validated");
       } else {
-        addLog(`Ledger finalization failed: ${data.error || "Verification issue"}`, "error");
+        addLog(`Ledger finalization failed: ${data.error || "Verification issue"} ${data.message || ""}`, "error");
         setStatusMessage("error");
       }
     } catch (err: any) {
@@ -127,11 +143,11 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
             const res = await fetch("/api/pi/approve", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ paymentId: mockPayId })
+              body: JSON.stringify({ paymentId: mockPayId, isSandboxSimulation: true })
             });
             const result = await res.json();
             if (result.success) {
-              addLog(`[MOCK] Approved. Broadcasting to testnet block explorer...`, "pending");
+              addLog(`[MOCK] Approved success! Broadcasting to testnet block explorer...`, "pending");
               
               setTimeout(() => {
                 const mockTx = `MOCK_TX_HASH_${Math.random().toString(36).substring(2, 12).toUpperCase()}`;
@@ -165,13 +181,13 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
             const res = await fetch("/api/pi/approve", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ paymentId: payId })
+              body: JSON.stringify({ paymentId: payId, isSandboxSimulation: false })
             });
             const result = await res.json();
             if (result.success) {
               addLog("Payment approved by server! Prompting Pioneer blockchain transaction signing...", "success");
             } else {
-              addLog(`Pi Core API server approval failed: ${result.error || "Unknown server code"}`, "error");
+              addLog(`Pi Core API server approval failed: ${result.error || "Unknown server code"}. ${result.message || ""}`, "error");
               setStatusMessage("error");
             }
           } catch (err: any) {
@@ -215,6 +231,35 @@ export default function PiPaymentTesting({ lang }: PiPaymentTestingProps) {
           <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-sans font-medium">
             {getTranslation("piTestDesc", lang)}
           </p>
+
+          {serverConfig && !serverConfig.hasApiKey && (
+            <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-900 dark:bg-amber-950/20 dark:border-amber-900/40 dark:text-amber-300">
+              <div className="flex items-start gap-2.5">
+                <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-500 mt-0.5 shrink-0 animate-pulse" />
+                <div className="space-y-1">
+                  <p className="font-extrabold text-sm uppercase tracking-wider text-amber-950 dark:text-amber-200">
+                    {lang === "RU" ? "PI_API_KEY не обнаружен!" : "PI_API_KEY Missing!"}
+                  </p>
+                  <p className="leading-relaxed text-slate-650 dark:text-zinc-350 font-sans font-medium">
+                    {lang === "RU" 
+                      ? "Блокчейн Pi требует обязательного серверного подтверждения (Server-to-Server). Без настроенного Server API Key плата в Pi Browser ВСЕГДА будет зависать и выдавать ошибку 'Payment Expired!' в кошельке." 
+                      : "The Pi blockchain requires secure serverside validation. Without your Server API Key, live transactions inside the Pi Browser will ALWAYS time out and fail with 'Payment Expired!' inside the wallet."}
+                  </p>
+                  <div className="pt-2 text-[10.5px]">
+                    <p className="font-black text-amber-950 dark:text-amber-100 uppercase tracking-widest text-[9.5px] mb-1">
+                      {lang === "RU" ? "Инструкция по настройке:" : "Configuration Guide:"}
+                    </p>
+                    <ol className="list-decimal pl-4.5 space-y-1 text-slate-600 dark:text-zinc-400 font-mono font-medium">
+                      <li>{lang === "RU" ? "Перейдите в Pi Developer Portal (develop.pi в Pi Browser) и откройте Ваше приложение." : "Go to Pi Developer Portal (develop.pi in the Pi Browser) and open your app config."}</li>
+                      <li>{lang === "RU" ? "Сгенерируйте и скопируйте 'Server API Key'." : "Generate and copy your developer 'Server API Key'."}</li>
+                      <li>{lang === "RU" ? "Добавьте этот ключ как переменную окружения PI_API_KEY (в Secrets панели AI Studio или в панели Vercel)." : "Add it as environment variable 'PI_API_KEY' (in AI Studio Secrets panel, or Vercel Environment Variables)."}</li>
+                      <li>{lang === "RU" ? "Перезапустите или обновите сервер, чтобы применить ключ." : "Redeploy or restart your app server."}</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Preset Buttons & Custom input */}
           <div className="pt-2 flex flex-wrap gap-2 items-center">

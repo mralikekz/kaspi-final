@@ -381,17 +381,35 @@ app.post("/api/crypto/explain", async (req, res) => {
   });
 });
 
-// 3. Pi payment server-side approval flow
+// 3. Status endpoint to assist developers in verifying their configuration
+app.get("/api/pi/status", (req, res) => {
+  res.json({
+    hasApiKey: !!(process.env.PI_API_KEY || process.env.PI_SERVER_KEY),
+    hasValidationKey: !!process.env.PI_VALIDATION_KEY,
+    nodeEnv: process.env.NODE_ENV || "development"
+  });
+});
+
+// 4. Pi payment server-side approval flow
 app.post("/api/pi/approve", async (req, res) => {
-  const { paymentId } = req.body;
+  const { paymentId, isSandboxSimulation } = req.body;
   if (!paymentId) {
     return res.status(400).json({ error: "Missing paymentId parameter" });
   }
 
+  const isMock = !!isSandboxSimulation || paymentId.startsWith("MOCK_");
   const apiKey = process.env.PI_API_KEY || process.env.PI_SERVER_KEY;
   if (!apiKey) {
-    console.warn("PI_API_KEY environment variable is not defined! Standard sandbox test mode is active.");
-    return res.json({ success: true, message: "Sandbox simulation approved", mocked: true });
+    if (isMock) {
+      console.log("Simulating approve: PI_API_KEY environment variable is not defined, but mockup is allowed.");
+      return res.json({ success: true, message: "Sandbox simulation approved", mocked: true });
+    }
+    console.warn("PI_API_KEY environment variable is not defined! Rejecting actual blockchain transaction handshake to prevent timeout.");
+    return res.status(400).json({
+      success: false,
+      error: "PI_API_KEY_MISSING",
+      message: "PI_API_KEY environment variable is not defined on the server! Real transactions in the Pi Browser require a configured API key to authorize payments. Please check your setup."
+    });
   }
 
   try {
@@ -401,7 +419,8 @@ app.post("/api/pi/approve", async (req, res) => {
       headers: {
         "Authorization": `Key ${apiKey}`,
         "Content-Type": "application/json"
-      }
+      },
+      body: JSON.stringify({})
     });
 
     if (apiRes.ok) {
@@ -419,17 +438,26 @@ app.post("/api/pi/approve", async (req, res) => {
   }
 });
 
-// 4. Pi payment server-side completion flow
+// 5. Pi payment server-side completion flow
 app.post("/api/pi/complete", async (req, res) => {
-  const { paymentId, txid } = req.body;
+  const { paymentId, txid, isSandboxSimulation } = req.body;
   if (!paymentId || !txid) {
     return res.status(400).json({ error: "Missing required parameters: paymentId or txid" });
   }
 
+  const isMock = !!isSandboxSimulation || paymentId.startsWith("MOCK_") || txid.startsWith("MOCK_");
   const apiKey = process.env.PI_API_KEY || process.env.PI_SERVER_KEY;
   if (!apiKey) {
-    console.warn("PI_API_KEY is not defined. Sandbox test transaction simulated successfully.");
-    return res.json({ success: true, message: "Sandbox completion simulated successfully", mocked: true });
+    if (isMock) {
+      console.log("Simulating completion: PI_API_KEY environment variable is not defined, but mockup is allowed.");
+      return res.json({ success: true, message: "Sandbox completion simulated successfully", mocked: true });
+    }
+    console.warn("PI_API_KEY is not defined. Cannot complete payment handshake.");
+    return res.status(400).json({
+      success: false,
+      error: "PI_API_KEY_MISSING",
+      message: "PI_API_KEY is missing on server. Blockchain payment cannot be finalized without a valid developer key."
+    });
   }
 
   try {
