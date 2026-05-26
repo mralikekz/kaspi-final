@@ -32,7 +32,8 @@ const STATIC_COINS: CoinPriceInfo[] = [
   { symbol: "XLM", name: "Stellar", category: "DeFi / Payments", price: 0.222, change24h: 0.52, marketCap: 6450120300, volume24h: 230100500, lastUpdated: new Date().toISOString() },
   { symbol: "BNB", name: "BNB", category: "Exchange Token / L1", price: 582.40, change24h: -0.45, marketCap: 85210040500, volume24h: 980120300, lastUpdated: new Date().toISOString() },
   { symbol: "TON", name: "TON", category: "Telegram Ecosystem", price: 5.12, change24h: 2.18, marketCap: 12900410200, volume24h: 185040300, lastUpdated: new Date().toISOString() },
-  { symbol: "TWT", name: "TWT", category: "Wallet Utility", price: 1.05, change24h: -1.88, marketCap: 430150200, volume24h: 12040100, lastUpdated: new Date().toISOString() }
+  { symbol: "TWT", name: "TWT", category: "Wallet Utility", price: 1.05, change24h: -1.88, marketCap: 430150200, volume24h: 12040100, lastUpdated: new Date().toISOString() },
+  { symbol: "ONDO", name: "Ondo Finance", category: "Real World Assets (RWA)", price: 1.15, change24h: 3.54, marketCap: 1650000000, volume24h: 185000000, lastUpdated: new Date().toISOString() }
 ];
 
 export default function App() {

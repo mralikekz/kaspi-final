@@ -88,6 +88,15 @@ const STATIC_COIN_DESC: { [key: string]: { EN: string; RU: string; ZH: string; F
     AR: "رمز تراست والت (TWT) هو رمز خدمة يوفر مكافآت حوكمة مخصصة، وتخفيضات رسوم التداول ومزايا مدمجة داخل محفظة Trust Wallet.",
     HI: "ट्रस्ट वॉलेट टोकन (TWT) ट्रस्ट वॉलेट का एक उपयोगिता टोकन है, जो उपयोगकर्ताओं को व्यापार छूट, शासन में भागीदारी और प्रीमियम सुविधाएँ प्रदान करता है।",
     ES: "Trust Wallet Token es un token de utilidad que ofrece de forma gratuita recompensas de gobernanza, descuentos en tarifas comerciales y funciones avanzadas dentro de Trust Wallet."
+  },
+  ONDO: {
+    EN: "Ondo Finance is a pioneer in Real World Asset (RWA) tokenization, bringing institutional-grade financial products such as US Treasuries and money markets onto public blockchains transparently.",
+    RU: "Ondo Finance — пионер в области токенизации реальных активов (RWA), который прозрачно переносит финансовые продукты институционального уровня (такие как казначейские облигации США) и взаимные фонды в публичные блокчейны.",
+    ZH: "Ondo Finance 是真实世界资产（RWA）代币化的先驱，将美债等机构级金融产品透明地引入公共区块链。",
+    FR: "Ondo Finance est un pionnier de la tokenisation d'actifs réels (RWA), apportant des produits financiers de qualité institutionnelle tels que les bons du Trésor américain sur les blockchains publiques.",
+    AR: "Ondo Finance هي شركة رائدة في ترميز الأصول في العالم الحقيقي (RWA)، حيث توفر منتجات مالية مؤسسية مثل سندات الخزانة الأمريكية وصناديق المال إلى سلاسل البلوكشين العامة بشفافية.",
+    HI: "Ondo Finance वास्तविक दुनिया की संपत्तियों (RWA) के टोकनाइजेशन में अग्रणी है, जो अमेरिकी ट्रेजरी और मुद्रा बाजारों जैसे वित्तीय उत्पादों को पारदर्शी रूप से सार्वजनिक ब्लॉकचेน पर लाता है।",
+    ES: "Ondo Finance es pionera en la tokenización de activos del mundo real (RWA), llevando productos financieros de alta calidad institucional, como los bonos del Tesoro de EE. UU., a cadenas de bloques públicas de forma transparente."
   }
 };
 

@@ -8,7 +8,8 @@ const COIN_METADATA = [
   { symbol: "XLM", name: "Stellar", geckoId: "stellar", category: "DeFi / Payments" },
   { symbol: "BNB", name: "BNB", geckoId: "binancecoin", category: "Exchange Token / L1" },
   { symbol: "TON", name: "TON", geckoId: "the-open-network", category: "Telegram Ecosystem" },
-  { symbol: "TWT", name: "TWT", geckoId: "trust-wallet-token", category: "Wallet Utility" }
+  { symbol: "TWT", name: "TWT", geckoId: "trust-wallet-token", category: "Wallet Utility" },
+  { symbol: "ONDO", name: "Ondo Finance", geckoId: "ondo-finance", category: "Real World Assets (RWA)" }
 ];
 
 const getStaticRank = (symbol: string): number => {
@@ -20,6 +21,7 @@ const getStaticRank = (symbol: string): number => {
     case "TON": return 10;
     case "XLM": return 15;
     case "HBAR": return 25;
+    case "ONDO": return 80;
     case "TWT": return 120;
     case "ZYPTO": return 1040;
     case "PI": return 3105;
@@ -36,6 +38,7 @@ const getStaticMaxSupply = (symbol: string): number | null => {
     case "TON": return null;
     case "XLM": return 50001806812;
     case "HBAR": return 50000000000;
+    case "ONDO": return 10000000000;
     case "TWT": return 1000000000;
     case "ZYPTO": return 100000000;
     case "PI": return 100000000000;
@@ -52,9 +55,78 @@ const getStaticCirculatingSupply = (symbol: string): number => {
     case "TON": return 2500000000;
     case "XLM": return 29000000000;
     case "HBAR": return 35700000000;
+    case "ONDO": return 1437142415;
     case "TWT": return 416000000;
     case "ZYPTO": return 89000000;
     case "PI": return 68000000000;
+    default: return 0;
+  }
+};
+
+const getStaticPrice = (symbol: string): number => {
+  switch (symbol.toUpperCase()) {
+    case "PI": return 41.25;
+    case "BTC": return 89450.00;
+    case "ETH": return 2740.15;
+    case "XRP": return 1.15;
+    case "HBAR": return 0.125;
+    case "ZYPTO": return 0.0185;
+    case "XLM": return 0.222;
+    case "BNB": return 582.40;
+    case "TON": return 5.12;
+    case "TWT": return 1.05;
+    case "ONDO": return 1.15;
+    default: return 0;
+  }
+};
+
+const getStaticChange24h = (symbol: string): number => {
+  switch (symbol.toUpperCase()) {
+    case "PI": return 1.45;
+    case "BTC": return -1.12;
+    case "ETH": return 0.85;
+    case "XRP": return -2.41;
+    case "HBAR": return 4.21;
+    case "ZYPTO": return -3.15;
+    case "XLM": return 0.52;
+    case "BNB": return -0.45;
+    case "TON": return 2.18;
+    case "TWT": return -1.88;
+    case "ONDO": return 3.54;
+    default: return 0;
+  }
+};
+
+const getStaticMarketCap = (symbol: string): number => {
+  switch (symbol.toUpperCase()) {
+    case "PI": return 0;
+    case "BTC": return 1750400120100;
+    case "ETH": return 329100500600;
+    case "XRP": return 65000210340;
+    case "HBAR": return 4250100200;
+    case "ZYPTO": return 18500120;
+    case "XLM": return 6450120300;
+    case "BNB": return 85210040500;
+    case "TON": return 12900410200;
+    case "TWT": return 430150200;
+    case "ONDO": return 1650000000;
+    default: return 0;
+  }
+};
+
+const getStaticVolume24h = (symbol: string): number => {
+  switch (symbol.toUpperCase()) {
+    case "PI": return 3521040;
+    case "BTC": return 28100500120;
+    case "ETH": return 14500100200;
+    case "XRP": return 1200150200;
+    case "HBAR": return 152010400;
+    case "ZYPTO": return 345100;
+    case "XLM": return 230100500;
+    case "BNB": return 980120300;
+    case "TON": return 185040300;
+    case "TWT": return 12040100;
+    case "ONDO": return 185000000;
     default: return 0;
   }
 };
@@ -114,10 +186,10 @@ export default async function handler(req: any, res: any) {
             symbol: coin.symbol,
             name: coin.name,
             category: coin.category,
-            price: usdQuote?.price || 0,
-            change24h: usdQuote?.percent_change_24h || 0,
-            marketCap: usdQuote?.market_cap || 0,
-            volume24h: usdQuote?.volume_24h || 0,
+            price: usdQuote?.price || getStaticPrice(coin.symbol),
+            change24h: usdQuote?.percent_change_24h !== undefined && usdQuote?.percent_change_24h !== null ? usdQuote.percent_change_24h : getStaticChange24h(coin.symbol),
+            marketCap: usdQuote?.market_cap || getStaticMarketCap(coin.symbol),
+            volume24h: usdQuote?.volume_24h || getStaticVolume24h(coin.symbol),
             lastUpdated: usdQuote?.last_updated || new Date().toISOString(),
             rank: fetched?.cmc_rank || getStaticRank(coin.symbol),
             maxSupply: maxSupplyRaw !== undefined && maxSupplyRaw !== null ? maxSupplyRaw : getStaticMaxSupply(coin.symbol),
@@ -149,10 +221,10 @@ export default async function handler(req: any, res: any) {
           symbol: coin.symbol,
           name: coin.name,
           category: coin.category,
-          price: rawInfo?.usd || 0,
-          change24h: rawInfo?.usd_24h_change || 0,
-          marketCap: rawInfo?.usd_market_cap || 0,
-          volume24h: rawInfo?.usd_24h_vol || 0,
+          price: rawInfo?.usd || getStaticPrice(coin.symbol),
+          change24h: rawInfo?.usd_24h_change !== undefined && rawInfo?.usd_24h_change !== null ? rawInfo.usd_24h_change : getStaticChange24h(coin.symbol),
+          marketCap: rawInfo?.usd_market_cap || getStaticMarketCap(coin.symbol),
+          volume24h: rawInfo?.usd_24h_vol || getStaticVolume24h(coin.symbol),
           lastUpdated: new Date().toISOString(),
           rank: getStaticRank(coin.symbol),
           maxSupply: getStaticMaxSupply(coin.symbol),
@@ -185,6 +257,7 @@ export default async function handler(req: any, res: any) {
       case "BNB": priceBySymbol = 582.40; changeBySymbol = -0.45; capBySymbol = 85210040500; volBySymbol = 980120300; break;
       case "TON": priceBySymbol = 5.12; changeBySymbol = 2.18; capBySymbol = 12900410200; volBySymbol = 185040300; break;
       case "TWT": priceBySymbol = 1.05; changeBySymbol = -1.88; capBySymbol = 430150200; volBySymbol = 12040100; break;
+      case "ONDO": priceBySymbol = 1.15; changeBySymbol = 3.54; capBySymbol = 1650000000; volBySymbol = 185000000; break;
     }
 
     return {

@@ -60,6 +60,13 @@ const ICON_FALLBACKS: Record<string, string[]> = {
     "https://s2.coinmarketcap.com/static/img/coins/64x64/5928.png",
     "https://images.weserv.nl/?url=s2.coinmarketcap.com/static/img/coins/64x64/5928.png",
     "https://assets.coingecko.com/coins/images/11085/large/Trust.png"
+  ],
+  ONDO: [
+    "https://s2.coinmarketcap.com/static/img/coins/64x64/21159.png",
+    "https://images.weserv.nl/?url=s2.coinmarketcap.com/static/img/coins/64x64/21159.png",
+    "https://s2.coinmarketcap.com/static/img/coins/200x200/21159.png",
+    "https://images.weserv.nl/?url=s2.coinmarketcap.com/static/img/coins/200x200/21159.png",
+    "https://assets.coingecko.com/coins/images/34685/large/ondo-finance.png"
   ]
 };
 
@@ -347,6 +354,35 @@ export default function CoinIcon({ symbol, className = "h-6 w-6", size = 24 }: C
             strokeLinecap="round"
             strokeLinejoin="round"
           />
+        </svg>
+      );
+
+    case "ONDO":
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={`${className} text-cyan-500 dark:text-cyan-400`}
+        >
+          <circle 
+            cx="12" 
+            cy="12" 
+            r="10" 
+            stroke="currentColor" 
+            strokeWidth="1.8" 
+            fill="currentColor" 
+            fillOpacity="0.05" 
+          />
+          <path 
+            d="M8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12C16 14.2091 14.2091 16 12 16" 
+            stroke="currentColor" 
+            strokeWidth="1.8" 
+            strokeLinecap="round" 
+          />
+          <circle cx="12" cy="12" r="2" fill="currentColor" />
         </svg>
       );
 

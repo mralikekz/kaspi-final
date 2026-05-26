@@ -124,13 +124,13 @@ export const TRANSLATIONS: Record<string, Record<KaspiLang, string>> = {
     ES: "“El portal KASPI siempre se actualizará y se agregarán nuevas monedas”."
   },
   showingCoinsCount: {
-    RU: "Показано: {count} из 10",
-    EN: "Showing: {count} of 10",
-    ZH: "显示：10 个中的 {count} 个",
-    FR: "Affichage: {count} sur 10",
-    AR: "عرض: {count} من 10",
-    HI: "दिखा रहा है: 10 में से {count}",
-    ES: "Mostrando: {count} de 10"
+    RU: "Показано валют: {count}",
+    EN: "Currencies displayed: {count}",
+    ZH: "显示货币数: {count}",
+    FR: "Pièces affichées: {count}",
+    AR: "العملات المعروضة: {count}",
+    HI: "प्रदर्शित सिक्के: {count}",
+    ES: "Monedas mostradas: {count}"
   },
   resolvingRates: {
     RU: "Загрузка актуальных котировок из CoinMarketCap...",
