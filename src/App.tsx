@@ -23,6 +23,7 @@ import CoinCard from "./components/CoinCard";
 import CoinDetailModal from "./components/CoinDetailModal";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
+import SettingsModal from "./components/SettingsModal";
 
 const STATIC_COINS: CoinPriceInfo[] = [
   { symbol: "PI", name: "Pi Network", category: "Utility / Network Coin", price: 41.25, change24h: 1.45, marketCap: 0, volume24h: 3521040, lastUpdated: new Date().toISOString() },
@@ -46,6 +47,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showInPi, setShowInPi] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState<CoinPriceInfo | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [source, setSource] = useState("local_cache_simulation");
   const [error, setError] = useState<string | null>(null);
 
@@ -198,7 +200,7 @@ export default function App() {
         refreshing={refreshing}
         lang={lang}
         setLang={setLang}
-        onHomeClick={() => handleNavigate("/")}
+        onHomeClick={() => setIsSettingsOpen(true)}
       />
 
       {currentPath === "/privacy" ? (
@@ -342,33 +344,6 @@ export default function App() {
             )}
           </div>
 
-          {/* Bottom utility */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-            <div className="rounded-xl bg-white border border-slate-100 p-4 dark:bg-zinc-900 dark:border-zinc-800">
-              <div className="flex items-center gap-2">
-                <Info className="h-4 w-4 text-purple-650" />
-                <h4 className="text-[10px] font-extrabold text-slate-800 dark:text-white uppercase tracking-wider font-sans">
-                  {getTranslation("aboutKaspiTitle", lang)}
-                </h4>
-              </div>
-              <p className="text-[11px] text-slate-400 dark:text-zinc-400 leading-relaxed mt-2 font-medium font-sans">
-                {getTranslation("aboutKaspiDesc", lang)}
-              </p>
-            </div>
-
-            <div className="rounded-xl bg-white border border-slate-100 p-4 dark:bg-zinc-900 dark:border-zinc-800">
-              <div className="flex items-center gap-2">
-                <Coins className="h-4 w-4 text-amber-500" />
-                <h4 className="text-[10px] font-extrabold text-slate-800 dark:text-white uppercase tracking-wider font-sans">
-                  {getTranslation("cmcIntegrationTitle", lang)}
-                </h4>
-              </div>
-              <p className="text-[11px] text-slate-400 dark:text-zinc-400 leading-relaxed mt-2 font-medium font-sans">
-                {getTranslation("cmcIntegrationDesc", lang)}
-              </p>
-            </div>
-          </div>
-
         </main>
       )}
 
@@ -415,6 +390,18 @@ export default function App() {
           lang={lang}
         />
       )}
+
+      {/* Settings & Info overlay modal triggered by clicking KASPI brand logo */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        lang={lang}
+        setLang={setLang}
+        darkMode={darkMode}
+        toggleDarkMode={toggleDarkMode}
+        showInPi={showInPi}
+        setShowInPi={setShowInPi}
+      />
 
     </div>
   );

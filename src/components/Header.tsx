@@ -1,5 +1,5 @@
 import React from "react";
-import { Sun, Moon, Search, Sparkles, Coins, RefreshCw } from "lucide-react";
+import { Sun, Moon, Search, Sparkles, Coins, RefreshCw, Settings } from "lucide-react";
 import { KaspiLang } from "../types";
 import { getTranslation } from "../utils/translations";
 
@@ -35,22 +35,31 @@ export default function Header({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           
-          {/* Brand/Logo Section matching Pi Browser theme with premium black and white icon */}
+          {/* Brand/Logo Section matching Pi Browser theme with premium black and white icon acting as a settings gateway */}
           <div 
             onClick={onHomeClick}
-            className="flex items-center gap-2 cursor-pointer select-none active:opacity-80"
+            className="flex items-center gap-2.5 cursor-pointer select-none active:scale-95 group rounded-2xl transition-all duration-200"
+            title={lang === "RU" ? "Открыть настройки и информацию KASPI" : "Open KASPI settings & system details"}
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black dark:bg-zinc-900 shadow-md">
-              <div className="flex h-6.5 w-6.5 items-center justify-center rounded-full bg-white">
-                <span className="text-sm font-serif font-black text-black pb-0.5 leading-none">π</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black dark:bg-zinc-900 shadow-md transition-transform duration-300 group-hover:scale-105 relative group-active:scale-95">
+              <div className="flex h-6.5 w-6.5 items-center justify-center rounded-full bg-white relative">
+                <span className="text-sm font-serif font-black text-black pb-0.5 leading-none select-none">π</span>
+              </div>
+              {/* Floating gear badge when hovered */}
+              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-lg bg-purple-600 border border-white dark:border-zinc-950 flex items-center justify-center text-white scale-0 group-hover:scale-110 duration-300 shadow-sm">
+                <Settings className="h-2.5 w-2.5 animate-spin-slow text-white" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-1">
-                <h1 className="text-lg font-black tracking-tight text-slate-900 dark:text-white leading-none">
+                <h1 className="text-sm md:text-base font-black tracking-wider text-slate-900 dark:text-white leading-none group-hover:text-purple-650 dark:group-hover:text-purple-400 transition-colors">
                   KASPI
                 </h1>
                 <div className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse mt-0.5" title={getTranslation("networkActive", lang)} />
+                {/* Tiny settings hint label */}
+                <span className="text-[7.5px] font-bold uppercase tracking-wider text-purple-600/80 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-1 py-0.5 rounded ml-1 scale-0 group-hover:scale-100 transition-transform origin-left duration-250">
+                  ⚙️ {lang === "RU" ? "КФГ" : "CFG"}
+                </span>
               </div>
               <p className="text-[9px] font-bold text-slate-450 dark:text-zinc-500 uppercase tracking-widest mt-0.5">
                 {getTranslation("infoPortal", lang)}
