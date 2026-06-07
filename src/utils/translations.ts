@@ -227,13 +227,13 @@ export const TRANSLATIONS: Record<string, Record<KaspiLang, string>> = {
     ES: "Todas las cotizaciones se sincronizan en tiempo real directamente a través de las API de CoinMarketCap y CoinGecko para garantizar la máxima precisión en las valoraciones y conversiones."
   },
   copyrightText: {
-    RU: "© 2026 KASPI. Все права защищены. Разработано для экосистемы Pi Network App Studio.",
-    EN: "© 2026 KASPI. All rights reserved. Built for the Pi Network App Studio ecosystem.",
-    ZH: "© 2026 KASPI. 保留所有权利。专为 Pi Network App Studio 生态系统开发。",
-    FR: "© 2026 KASPI. Tous droits réservés. Développé pour l'écosystème de Pi Network App Studio.",
-    AR: "© 2026 KASPI. جميع الحقوق محفوظة. تم التطوير لمنظومة Pi Network App Studio.",
-    HI: "© 2026 KASPI. सर्वाधिकार सुरक्षित। Pi Network App Studio पारिस्थितिकी तंत्र के लिए विकसित।",
-    ES: "© 2026 KASPI. Todos los derechos reservados. Desarrollado para el ecosistema de Pi Network App Studio."
+    RU: "© 2026 KASPI. Все права защищены.",
+    EN: "© 2026 KASPI. All rights reserved.",
+    ZH: "© 2026 KASPI。保留所有权利。",
+    FR: "© 2026 KASPI. Tous droits réservés.",
+    AR: "© 2026 KASPI. جميع الحقوق محفوظة.",
+    HI: "© 2026 KASPI. सर्वाधिकार सुरक्षित।",
+    ES: "© 2026 KASPI. Todos los derechos reservados."
   },
 
   // Coin Detail items
