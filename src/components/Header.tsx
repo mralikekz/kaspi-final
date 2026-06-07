@@ -14,6 +14,7 @@ interface HeaderProps {
   refreshing: boolean;
   lang: KaspiLang;
   setLang: (val: KaspiLang) => void;
+  onHomeClick?: () => void;
 }
 
 export default function Header({
@@ -26,7 +27,8 @@ export default function Header({
   onRefresh,
   refreshing,
   lang,
-  setLang
+  setLang,
+  onHomeClick
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-100 bg-white/95 backdrop-blur-md dark:bg-zinc-950/95 dark:border-zinc-900 transition-colors duration-300">
@@ -34,7 +36,10 @@ export default function Header({
         <div className="flex h-16 items-center justify-between gap-4">
           
           {/* Brand/Logo Section matching Pi Browser theme with premium black and white icon */}
-          <div className="flex items-center gap-2">
+          <div 
+            onClick={onHomeClick}
+            className="flex items-center gap-2 cursor-pointer select-none active:opacity-80"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black dark:bg-zinc-900 shadow-md">
               <div className="flex h-6.5 w-6.5 items-center justify-center rounded-full bg-white">
                 <span className="text-sm font-serif font-black text-black pb-0.5 leading-none">π</span>

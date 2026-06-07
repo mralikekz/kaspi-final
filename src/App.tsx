@@ -21,6 +21,8 @@ import { getTranslation } from "./utils/translations";
 import Header from "./components/Header";
 import CoinCard from "./components/CoinCard";
 import CoinDetailModal from "./components/CoinDetailModal";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsOfService from "./components/TermsOfService";
 
 const STATIC_COINS: CoinPriceInfo[] = [
   { symbol: "PI", name: "Pi Network", category: "Utility / Network Coin", price: 41.25, change24h: 1.45, marketCap: 0, volume24h: 3521040, lastUpdated: new Date().toISOString() },
@@ -37,6 +39,7 @@ const STATIC_COINS: CoinPriceInfo[] = [
 ];
 
 export default function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [coins, setCoins] = useState<CoinPriceInfo[]>(STATIC_COINS);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -45,6 +48,23 @@ export default function App() {
   const [selectedCoin, setSelectedCoin] = useState<CoinPriceInfo | null>(null);
   const [source, setSource] = useState("local_cache_simulation");
   const [error, setError] = useState<string | null>(null);
+
+  // Router listener to capture back/forward navigation in Pi Browser / sandbox
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const handleNavigate = (path: string) => {
+    window.history.pushState({}, "", path);
+    setCurrentPath(path);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Language representation state
   const [lang, setLang] = useState<KaspiLang>(() => {
@@ -178,183 +198,211 @@ export default function App() {
         refreshing={refreshing}
         lang={lang}
         setLang={setLang}
+        onHomeClick={() => handleNavigate("/")}
       />
 
-      {/* Main Content Dashboard Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6">
-        
-        {/* Welcome Banner - Optimized & Smaller layout */}
-        <div className="rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-800 to-purple-900 p-3.5 md:p-4.5 text-white relative overflow-hidden shadow-md">
-          <div className="absolute top-0 right-0 h-32 w-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+      {currentPath === "/privacy" ? (
+        <PrivacyPolicy lang={lang} onBack={() => handleNavigate("/")} />
+      ) : currentPath === "/terms" ? (
+        <TermsOfService lang={lang} onBack={() => handleNavigate("/")} />
+      ) : (
+        /* Main Content Dashboard Container */
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6">
           
-          <div className="relative">
-            {/* Shrunk and lighter alert badge */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 mb-2.5">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-400 text-purple-950 uppercase tracking-wide shadow-xs">
-                <Sparkles className="h-2.5 w-2.5" /> 
-                {getTranslation("kaspiActive", lang)}
-              </span>
-            </div>
-
-            <p className="text-xs text-purple-100 max-w-2xl leading-relaxed">
-              {getTranslation("welcomeText", lang)}
-            </p>
-
-            <div className="mt-3.5 flex flex-wrap gap-2.5 items-center">
-              <div className="bg-white/10 backdrop-blur-md border border-white/5 rounded-xl px-2.5 py-1.5 flex items-center gap-2.5">
-                <div className="h-6 w-6 rounded-lg bg-amber-400/20 flex items-center justify-center">
-                  <span className="text-lg font-bold text-amber-300 font-serif">π</span>
-                </div>
-                <div>
-                  <span className="block text-[8px] uppercase text-purple-200 tracking-wider font-sans">
-                    {getTranslation("basePiRate", lang)}
-                  </span>
-                  <span className="text-xs font-bold font-mono text-amber-300">
-                    ${piPrice.toFixed(2)} USD
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-md border border-white/5 rounded-xl px-2.5 py-1.5 flex items-center gap-2.5">
-                <div className="h-6 w-6 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                  <Activity className="h-3 w-3 text-indigo-300" />
-                </div>
-                <div>
-                  <span className="block text-[8px] uppercase text-purple-200 tracking-wider font-sans font-semibold">
-                    {getTranslation("dataStatus", lang)}
-                  </span>
-                  <span className="text-[10px] font-semibold text-slate-100 flex items-center gap-1 font-sans">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    CMC {source === "coinmarketcap" ? "(Live)" : "(Fallback / Cache)"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile search bar */}
-        <div className="relative md:hidden">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-            <Search className="h-4 w-4" />
-          </div>
-          <input
-            type="text"
-            id="mobile-search-input"
-            placeholder={getTranslation("searchPlaceholder", lang)}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 px-10 text-xs font-semibold focus:border-purple-500 focus:outline-hidden dark:bg-zinc-900 dark:border-zinc-800 dark:text-white transition-all shadow-xs"
-          />
-        </div>
-
-        {/* Dynamic warning bar */}
-        {error && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 dark:bg-rose-950/20 dark:border-rose-900 dark:text-rose-300 text-xs flex items-start gap-2.5">
-            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold">{getTranslation("syncIssueText", lang)}</p>
-              <p className="mt-1 leading-relaxed">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Main Grid: List of 10 crypto coins */}
-        <div className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-zinc-800/80 pb-2.5">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
-              <div className="flex items-center gap-2">
-                <Coins className="h-4.5 w-4.5 text-purple-650 dark:text-purple-400" />
-                <h3 className="font-sans font-extrabold text-slate-900 dark:text-white text-xs uppercase tracking-wider whitespace-nowrap">
-                  {getTranslation("coinMarket", lang)}
-                </h3>
-              </div>
-              <span className="text-[10px] md:text-xs text-slate-500 dark:text-zinc-400 font-medium italic">
-                {getTranslation("kaspiQuote", lang)}
-              </span>
-            </div>
+          {/* Welcome Banner - Optimized & Smaller layout */}
+          <div className="rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-800 to-purple-900 p-3.5 md:p-4.5 text-white relative overflow-hidden shadow-md">
+            <div className="absolute top-0 right-0 h-32 w-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
             
-            <span className="self-start md:self-auto text-[9px] font-mono font-bold uppercase bg-slate-100 text-slate-500 py-1 px-2 rounded-full dark:bg-zinc-800 dark:text-zinc-400">
-              {getTranslation("showingCoinsCount", lang, String(filteredCoins.length))}
-            </span>
+            <div className="relative">
+              {/* Shrunk and lighter alert badge */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 mb-2.5">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-400 text-purple-950 uppercase tracking-wide shadow-xs">
+                  <Sparkles className="h-2.5 w-2.5" /> 
+                  {getTranslation("kaspiActive", lang)}
+                </span>
+              </div>
+
+              <p className="text-xs text-purple-100 max-w-2xl leading-relaxed">
+                {getTranslation("welcomeText", lang)}
+              </p>
+
+              <div className="mt-3.5 flex flex-wrap gap-2.5 items-center">
+                <div className="bg-white/10 backdrop-blur-md border border-white/5 rounded-xl px-2.5 py-1.5 flex items-center gap-2.5">
+                  <div className="h-6 w-6 rounded-lg bg-amber-400/20 flex items-center justify-center">
+                    <span className="text-lg font-bold text-amber-300 font-serif">π</span>
+                  </div>
+                  <div>
+                    <span className="block text-[8px] uppercase text-purple-200 tracking-wider font-sans">
+                      {getTranslation("basePiRate", lang)}
+                    </span>
+                    <span className="text-xs font-bold font-mono text-amber-300">
+                      ${piPrice.toFixed(2)} USD
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-white/10 backdrop-blur-md border border-white/5 rounded-xl px-2.5 py-1.5 flex items-center gap-2.5">
+                  <div className="h-6 w-6 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                    <Activity className="h-3 w-3 text-indigo-300" />
+                  </div>
+                  <div>
+                    <span className="block text-[8px] uppercase text-purple-200 tracking-wider font-sans font-semibold">
+                      {getTranslation("dataStatus", lang)}
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-100 flex items-center gap-1 font-sans">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      CMC {source === "coinmarketcap" ? "(Live)" : "(Fallback / Cache)"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-450">
-              <span className="h-7 w-7 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
-              <p className="mt-4 text-xs font-medium dark:text-zinc-400">
-                {getTranslation("resolvingRates", lang)}
-              </p>
+          {/* Mobile search bar */}
+          <div className="relative md:hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <Search className="h-4 w-4" />
             </div>
-          ) : filteredCoins.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredCoins.map((coin) => (
-                <CoinCard
-                  key={coin.symbol}
-                  coin={coin}
-                  piPrice={piPrice}
-                  isSelected={selectedCoin?.symbol === coin.symbol}
-                  onClick={() => setSelectedCoin(coin)}
-                  showInPi={showInPi}
-                  lang={lang}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 rounded-2xl bg-white border border-slate-150 dark:bg-zinc-900 dark:border-zinc-800 p-6">
-              <p className="text-slate-400 text-xs text-center font-medium">
-                {getTranslation("noCoinsFound", lang)}
-              </p>
-              <button
-                id="reset-search-btn"
-                onClick={() => setSearchQuery("")}
-                className="mt-2 text-xs text-purple-650 font-bold hover:underline cursor-pointer font-sans"
-              >
-                {getTranslation("clearFilter", lang)}
-              </button>
+            <input
+              type="text"
+              id="mobile-search-input"
+              placeholder={getTranslation("searchPlaceholder", lang)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white py-2 px-10 text-xs font-semibold focus:border-purple-500 focus:outline-hidden dark:bg-zinc-900 dark:border-zinc-800 dark:text-white transition-all shadow-xs"
+            />
+          </div>
+
+          {/* Dynamic warning bar */}
+          {error && (
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 dark:bg-rose-950/20 dark:border-rose-900 dark:text-rose-300 text-xs flex items-start gap-2.5">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">{getTranslation("syncIssueText", lang)}</p>
+                <p className="mt-1 leading-relaxed">{error}</p>
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Bottom utility */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-          <div className="rounded-xl bg-white border border-slate-100 p-4 dark:bg-zinc-900 dark:border-zinc-800">
-            <div className="flex items-center gap-2">
-              <Info className="h-4 w-4 text-purple-650" />
-              <h4 className="text-[10px] font-extrabold text-slate-800 dark:text-white uppercase tracking-wider font-sans">
-                {getTranslation("aboutKaspiTitle", lang)}
-              </h4>
+          {/* Main Grid: List of 10 crypto coins */}
+          <div className="space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-zinc-800/80 pb-2.5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+                <div className="flex items-center gap-2">
+                  <Coins className="h-4.5 w-4.5 text-purple-650 dark:text-purple-400" />
+                  <h3 className="font-sans font-extrabold text-slate-900 dark:text-white text-xs uppercase tracking-wider whitespace-nowrap">
+                    {getTranslation("coinMarket", lang)}
+                  </h3>
+                </div>
+                <span className="text-[10px] md:text-xs text-slate-500 dark:text-zinc-400 font-medium italic">
+                  {getTranslation("kaspiQuote", lang)}
+                </span>
+              </div>
+              
+              <span className="self-start md:self-auto text-[9px] font-mono font-bold uppercase bg-slate-100 text-slate-500 py-1 px-2 rounded-full dark:bg-zinc-800 dark:text-zinc-400">
+                {getTranslation("showingCoinsCount", lang, String(filteredCoins.length))}
+              </span>
             </div>
-            <p className="text-[11px] text-slate-400 dark:text-zinc-400 leading-relaxed mt-2 font-medium font-sans">
-              {getTranslation("aboutKaspiDesc", lang)}
-            </p>
+
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 text-slate-450">
+                <span className="h-7 w-7 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+                <p className="mt-4 text-xs font-medium dark:text-zinc-400">
+                  {getTranslation("resolvingRates", lang)}
+                </p>
+              </div>
+            ) : filteredCoins.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredCoins.map((coin) => (
+                  <CoinCard
+                    key={coin.symbol}
+                    coin={coin}
+                    piPrice={piPrice}
+                    isSelected={selectedCoin?.symbol === coin.symbol}
+                    onClick={() => setSelectedCoin(coin)}
+                    showInPi={showInPi}
+                    lang={lang}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 rounded-2xl bg-white border border-slate-150 dark:bg-zinc-900 dark:border-zinc-800 p-6">
+                <p className="text-slate-400 text-xs text-center font-medium">
+                  {getTranslation("noCoinsFound", lang)}
+                </p>
+                <button
+                  id="reset-search-btn"
+                  onClick={() => setSearchQuery("")}
+                  className="mt-2 text-xs text-purple-650 font-bold hover:underline cursor-pointer font-sans"
+                >
+                  {getTranslation("clearFilter", lang)}
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="rounded-xl bg-white border border-slate-100 p-4 dark:bg-zinc-900 dark:border-zinc-800">
-            <div className="flex items-center gap-2">
-              <Coins className="h-4 w-4 text-amber-500" />
-              <h4 className="text-[10px] font-extrabold text-slate-800 dark:text-white uppercase tracking-wider font-sans">
-                {getTranslation("cmcIntegrationTitle", lang)}
-              </h4>
+          {/* Bottom utility */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+            <div className="rounded-xl bg-white border border-slate-100 p-4 dark:bg-zinc-900 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-purple-650" />
+                <h4 className="text-[10px] font-extrabold text-slate-800 dark:text-white uppercase tracking-wider font-sans">
+                  {getTranslation("aboutKaspiTitle", lang)}
+                </h4>
+              </div>
+              <p className="text-[11px] text-slate-400 dark:text-zinc-400 leading-relaxed mt-2 font-medium font-sans">
+                {getTranslation("aboutKaspiDesc", lang)}
+              </p>
             </div>
-            <p className="text-[11px] text-slate-400 dark:text-zinc-400 leading-relaxed mt-2 font-medium font-sans">
-              {getTranslation("cmcIntegrationDesc", lang)}
-            </p>
-          </div>
-        </div>
 
-      </main>
+            <div className="rounded-xl bg-white border border-slate-100 p-4 dark:bg-zinc-900 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                <Coins className="h-4 w-4 text-amber-500" />
+                <h4 className="text-[10px] font-extrabold text-slate-800 dark:text-white uppercase tracking-wider font-sans">
+                  {getTranslation("cmcIntegrationTitle", lang)}
+                </h4>
+              </div>
+              <p className="text-[11px] text-slate-400 dark:text-zinc-400 leading-relaxed mt-2 font-medium font-sans">
+                {getTranslation("cmcIntegrationDesc", lang)}
+              </p>
+            </div>
+          </div>
+
+        </main>
+      )}
 
       {/* Footer Banner */}
-      <footer className="w-full border-t border-slate-100 py-6 text-center text-xs text-slate-400 dark:border-zinc-900 dark:text-zinc-505 bg-white dark:bg-zinc-950 mt-10 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 font-sans">
-          <p>
-            {getTranslation("copyrightText", lang)}
-          </p>
-          <div className="flex items-center gap-1">
-            <span>Powered by</span>
-            <span className="font-bold text-slate-600 dark:text-zinc-400 font-sans">KASPI Proxy</span>
+      <footer className="w-full border-t border-slate-150 py-8 text-center text-xs text-slate-400 dark:border-zinc-900 dark:text-zinc-500 bg-white dark:bg-zinc-950 mt-auto transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          
+          {/* Compliant documents links */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-bold text-purple-650 dark:text-purple-400">
+            <button 
+              onClick={() => handleNavigate("/privacy")} 
+              className="hover:text-purple-800 dark:hover:text-purple-300 transition-colors cursor-pointer select-none active:scale-95"
+            >
+              {lang === "RU" ? "Политика Конфиденциальности" : "Privacy Policy"}
+            </button>
+            <span className="text-slate-300 dark:text-zinc-800">|</span>
+            <button 
+              onClick={() => handleNavigate("/terms")} 
+              className="hover:text-purple-800 dark:hover:text-purple-300 transition-colors cursor-pointer select-none active:scale-95"
+            >
+              {lang === "RU" ? "Пользовательское Соглашение" : "Terms of Service"}
+            </button>
           </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 font-sans pt-2 border-t border-slate-100 dark:border-zinc-900/60">
+            <p className="text-[11px] text-slate-400 dark:text-zinc-500">
+              {getTranslation("copyrightText", lang)}
+            </p>
+            <div className="flex items-center gap-1.5 text-[11px]">
+              <span>Powered by</span>
+              <span className="font-bold text-slate-600 dark:text-zinc-300 font-sans">KASPI Proxy</span>
+            </div>
+          </div>
+
         </div>
       </footer>
 
