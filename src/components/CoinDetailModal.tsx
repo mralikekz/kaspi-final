@@ -41,13 +41,15 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
   const [payError, setPayError] = useState<string | null>(null);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(() => {
     if (!coin) return false;
-    return localStorage.getItem(`kaspi_unlocked_${coin.symbol}`) === "true";
+    return localStorage.getItem(`kaspi_unlocked_${coin.symbol}`) === "true" || 
+           localStorage.getItem("kaspi_unlocked_premium_all") === "true";
   });
 
   // Keep purchase state synced when selecting different coins
   useEffect(() => {
     if (coin) {
-      setIsUnlocked(localStorage.getItem(`kaspi_unlocked_${coin.symbol}`) === "true");
+      setIsUnlocked(localStorage.getItem(`kaspi_unlocked_${coin.symbol}`) === "true" || 
+                     localStorage.getItem("kaspi_unlocked_premium_all") === "true");
       setPurchaseStatus("idle");
       setPayError(null);
     }
@@ -56,6 +58,21 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
   const handleUnlockForecast = async () => {
     if (!coin) return;
     setPayError(null);
+
+    const getHeaders = (base: Record<string, string> = {}) => {
+      try {
+        const savedKey = localStorage.getItem("kaspi_pi_api_key_override");
+        if (savedKey && savedKey.trim()) {
+          return {
+            ...base,
+            "X-Pi-API-Key": savedKey.trim()
+          };
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+      return base;
+    };
 
     if (typeof window === "undefined" || !window.Pi) {
       setPayError(getTranslation("piBrowserRequired", lang));
@@ -75,7 +92,9 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
       setPurchaseStatus("authenticating");
       let isSandbox = true;
       try {
-        const res = await fetch("/api/pi/status");
+        const res = await fetch("/api/pi/status", {
+          headers: getHeaders()
+        });
         if (res.ok) {
           const statusVal = await res.json();
           if (statusVal.isSandboxMode !== undefined) {
@@ -112,7 +131,7 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
         try {
           await fetch("/api/pi/complete", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: getHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify({
               paymentId: payment.identifier,
               txid: payment.transaction.txid,
@@ -143,7 +162,7 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
           try {
             const res = await fetch("/api/pi/approve", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: getHeaders({ "Content-Type": "application/json" }),
               body: JSON.stringify({ paymentId: payId, isSandboxSimulation: isSandbox })
             });
             const result = await res.json();
@@ -160,7 +179,7 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
           try {
             const res = await fetch("/api/pi/complete", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: getHeaders({ "Content-Type": "application/json" }),
               body: JSON.stringify({ paymentId: payId, txid: blockchainTxId, isSandboxSimulation: isSandbox })
             });
             const result = await res.json();
