@@ -49,7 +49,7 @@ export default function PiDeveloperSandbox({
   const [customMemo, setCustomMemo] = useState<string>("Testing Pi App Studio Payment Flow");
 
   // Server status and event log states
-  const [backendStatus, setBackendStatus] = useState<{ hasApiKey: boolean; nodeEnv: string } | null>(null);
+  const [backendStatus, setBackendStatus] = useState<{ hasApiKey: boolean; nodeEnv: string; isSandboxMode?: boolean; keyPrefix?: string } | null>(null);
   const [serverLogs, setServerLogs] = useState<any[]>([]);
   const [isLogsLoading, setIsLogsLoading] = useState<boolean>(false);
 
@@ -125,11 +125,16 @@ export default function PiDeveloperSandbox({
     setActiveTxid(null);
 
     const product = getActiveProduct();
-    const isSandboxMode = window.location.search.includes("sandbox=true") || 
-                           window.location.search.includes("sandbox=1") || 
-                           window.location.hostname.includes("sandbox") ||
-                           !!(document.referrer && document.referrer.includes("sandbox")) ||
-                           true;
+    let isSandboxMode = backendStatus?.isSandboxMode !== undefined ? backendStatus.isSandboxMode : true;
+
+    // Explicit query param overrides take highest precedence if specified
+    if (window.location.search.includes("sandbox=true") || window.location.search.includes("sandbox=1")) {
+      isSandboxMode = true;
+    } else if (window.location.search.includes("sandbox=false") || window.location.search.includes("sandbox=0")) {
+      isSandboxMode = false;
+    }
+
+    console.log("[Pi Payments] Using sandbox state:", isSandboxMode);
 
     try {
       const piSdk = (window as any).Pi;

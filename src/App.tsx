@@ -95,12 +95,28 @@ export default function App() {
       }
 
       console.log("[Pi Auth] Initializing Pi SDK...");
-      const isSandboxMode = window.location.search.includes("sandbox=true") || 
-                             window.location.search.includes("sandbox=1") || 
-                             window.location.hostname.includes("sandbox") ||
-                             !!(document.referrer && document.referrer.includes("sandbox")) ||
-                             true;
+      let isSandboxMode = true;
+      try {
+        const statusRes = await fetch("/api/pi/status");
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          if (statusData.isSandboxMode !== undefined) {
+            isSandboxMode = statusData.isSandboxMode;
+          }
+        }
+      } catch (e) {
+        console.warn("[Pi Auth] Could not query backend sandbox status, using URL detection:", e);
+      }
+
+      // Explicit query param overrides take highest precedence if specified
+      if (window.location.search.includes("sandbox=true") || window.location.search.includes("sandbox=1")) {
+        isSandboxMode = true;
+      } else if (window.location.search.includes("sandbox=false") || window.location.search.includes("sandbox=0")) {
+        isSandboxMode = false;
+      }
       
+      console.log("[Pi Auth] Selected Sandbox state:", isSandboxMode);
+
       // Use 5.5s timeout for fast environment detection so standard browser users don't hang for 120,000ms
       await withTimeout(
         piSdk.init({ version: "2.0", sandbox: isSandboxMode }),

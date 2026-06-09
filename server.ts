@@ -455,14 +455,29 @@ app.post("/api/crypto/explain", async (req, res) => {
 });
 
 // 3. Status endpoint and Key search helpers to assist developers in verifying their configuration
-const getPiApiKey = (): string | undefined => {
-  return process.env.PI_API_KEY || 
-         process.env.PI_SERVER_KEY || 
-         process.env.PI_KEY || 
-         process.env.MINEPI_API_KEY || 
-         process.env.MINEPI_KEY || 
-         process.env.MINEPI_SERVER_KEY ||
-         "akzcrcxf9gkkb3xbe2kxskkkc1x46khrgqk6u8iqs61fl5iefe1zxjhm4tvekt6m";
+const getPiApiKey = (req?: express.Request): string | undefined => {
+  // Check optional override header from custom local frontend settings
+  const headerKey = req?.header("X-Pi-API-Key") || req?.header("x-pi-api-key");
+  if (headerKey && headerKey.trim() !== "" && headerKey !== "undefined" && headerKey !== "null") {
+    return headerKey.trim();
+  }
+
+  const keys = [
+    process.env.PI_API_KEY,
+    process.env.PI_SERVER_KEY,
+    process.env.PI_KEY,
+    process.env.MINEPI_API_KEY,
+    process.env.MINEPI_KEY,
+    process.env.MINEPI_SERVER_KEY
+  ];
+
+  for (const k of keys) {
+    if (k && k.trim() !== "" && k !== "undefined" && k !== "null") {
+      return k.trim();
+    }
+  }
+
+  return "akzcrcxf9gkkb3xbe2kxskkkc1x46khrgqk6u8iqs61fl5iefe1zxjhm4tvekt6m";
 };
 
 // Diagnostics logger to record Pi API handshakes in memory
@@ -505,11 +520,14 @@ app.post("/api/pi/logs/clear", (req, res) => {
 });
 
 app.get("/api/pi/status", (req, res) => {
-  const apiKey = getPiApiKey();
+  const apiKey = getPiApiKey(req);
+  const isSandbox = apiKey ? apiKey.toLowerCase().startsWith("sb") : true;
   res.json({
     hasApiKey: !!apiKey,
     hasValidationKey: !!process.env.PI_VALIDATION_KEY,
-    nodeEnv: process.env.NODE_ENV || "development"
+    nodeEnv: process.env.NODE_ENV || "development",
+    isSandboxMode: isSandbox,
+    keyPrefix: apiKey ? apiKey.substring(0, 4) : ""
   });
 });
 
@@ -551,7 +569,7 @@ app.post("/api/pi/approve", async (req, res) => {
   }
 
   const isMock = !!isSandboxSimulation || paymentId.startsWith("MOCK_");
-  const apiKey = getPiApiKey();
+  const apiKey = getPiApiKey(req);
   
   logPiEvent("approve", paymentId, "info", "Incoming approval request check", { isSandboxSimulation, isMock, hasApiKey: !!apiKey });
 
@@ -619,7 +637,7 @@ app.post("/api/pi/complete", async (req, res) => {
   }
 
   const isMock = !!isSandboxSimulation || paymentId.startsWith("MOCK_") || txid.startsWith("MOCK_");
-  const apiKey = getPiApiKey();
+  const apiKey = getPiApiKey(req);
 
   logPiEvent("complete", paymentId, "info", "Incoming completion request check", { txid, isSandboxSimulation, isMock, hasApiKey: !!apiKey });
 

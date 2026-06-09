@@ -1,11 +1,25 @@
-const getPiApiKey = (): string | undefined => {
-  return process.env.PI_API_KEY || 
-         process.env.PI_SERVER_KEY || 
-         process.env.PI_KEY || 
-         process.env.MINEPI_API_KEY || 
-         process.env.MINEPI_KEY || 
-         process.env.MINEPI_SERVER_KEY ||
-         "akzcrcxf9gkkb3xbe2kxskkkc1x46khrgqk6u8iqs61fl5iefe1zxjhm4tvekt6m";
+const getPiApiKey = (req?: any): string | undefined => {
+  const headerKey = req?.headers?.["x-pi-api-key"] || req?.headers?.["X-Pi-API-Key"];
+  if (headerKey && headerKey.trim() !== "" && headerKey !== "undefined" && headerKey !== "null") {
+    return headerKey.trim();
+  }
+
+  const keys = [
+    process.env.PI_API_KEY,
+    process.env.PI_SERVER_KEY,
+    process.env.PI_KEY,
+    process.env.MINEPI_API_KEY,
+    process.env.MINEPI_KEY,
+    process.env.MINEPI_SERVER_KEY
+  ];
+
+  for (const k of keys) {
+    if (k && k.trim() !== "" && k !== "undefined" && k !== "null") {
+      return k.trim();
+    }
+  }
+
+  return "akzcrcxf9gkkb3xbe2kxskkkc1x46khrgqk6u8iqs61fl5iefe1zxjhm4tvekt6m";
 };
 
 export default async function handler(req: any, res: any) {
@@ -34,7 +48,7 @@ export default async function handler(req: any, res: any) {
   }
 
   const isMock = !!isSandboxSimulation || paymentId.startsWith("MOCK_");
-  const apiKey = getPiApiKey();
+  const apiKey = getPiApiKey(req);
   
   console.log(`[Pi /api/pi/approve] Incoming request for paymentId: ${paymentId}. isMock: ${isMock}, hasApiKey: ${!!apiKey}`);
 

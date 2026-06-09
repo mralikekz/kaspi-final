@@ -74,11 +74,24 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
     try {
       setPurchaseStatus("authenticating");
       let isSandbox = true;
+      try {
+        const res = await fetch("/api/pi/status");
+        if (res.ok) {
+          const statusVal = await res.json();
+          if (statusVal.isSandboxMode !== undefined) {
+            isSandbox = statusVal.isSandboxMode;
+          }
+        }
+      } catch (e) {
+        console.warn("Could not fetch sandbox status:", e);
+      }
+
       if (typeof window !== "undefined") {
-        isSandbox = window.location.search.includes("sandbox=true") || 
-                    window.location.search.includes("sandbox=1") || 
-                    window.location.hostname.includes("sandbox") ||
-                    !!(document.referrer && document.referrer.includes("sandbox"));
+        if (window.location.search.includes("sandbox=true") || window.location.search.includes("sandbox=1")) {
+          isSandbox = true;
+        } else if (window.location.search.includes("sandbox=false") || window.location.search.includes("sandbox=0")) {
+          isSandbox = false;
+        }
       }
 
       try {
