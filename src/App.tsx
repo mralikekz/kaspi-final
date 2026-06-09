@@ -24,7 +24,6 @@ import CoinDetailModal from "./components/CoinDetailModal";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import SettingsModal from "./components/SettingsModal";
-import PiDeveloperSandbox from "./components/PiDeveloperSandbox";
 
 const STATIC_COINS: CoinPriceInfo[] = [
   { symbol: "PI", name: "Pi Network", category: "Utility / Network Coin", price: 41.25, change24h: 1.45, marketCap: 0, volume24h: 3521040, lastUpdated: new Date().toISOString() },
@@ -497,14 +496,6 @@ export default function App() {
             )}
           </div>
 
-          {/* Interactive Pi Network Sandbox Store and Payment Console */}
-          <PiDeveloperSandbox 
-            lang={lang}
-            piUser={piUser}
-            piPrice={piPrice}
-            onRefreshSession={handlePiSignIn}
-          />
-
         </main>
       )}
 
@@ -562,6 +553,9 @@ export default function App() {
         toggleDarkMode={toggleDarkMode}
         showInPi={showInPi}
         setShowInPi={setShowInPi}
+        piUser={piUser}
+        piPrice={piPrice}
+        onRefreshSession={handlePiSignIn}
       />
 
     </div>
