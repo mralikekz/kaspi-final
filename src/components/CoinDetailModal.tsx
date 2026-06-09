@@ -74,16 +74,34 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
       }
 
       try {
-        window.Pi.init({ version: "2.0", sandbox: isSandbox });
+        // Treat Pi.init(...) as a Promise; await it fully before calling Pi.authenticate(...)
+        await window.Pi.init({ version: "2.0", sandbox: isSandbox });
       } catch (e: any) {
         if (!e.message?.includes("already") && !e.message?.includes("init")) {
           console.warn("Pi init exception:", e);
         }
       }
 
+      const onIncompletePaymentFound = async (payment: any) => {
+        console.log("[Pi SDK] Incomplete payment found in CoinDetailModal authenticate:", payment);
+        try {
+          await fetch("/api/pi/complete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              paymentId: payment.identifier,
+              txid: payment.transaction.txid,
+              isSandboxSimulation: isSandbox
+            })
+          });
+        } catch (err) {
+          console.error("CoinDetailModal failed to auto-complete found incomplete payment:", err);
+        }
+      };
+
       const authResponse = await window.Pi.authenticate(
-        ["payments", "username"],
-        (onAndroidHeaderReceived: any) => {}
+        ["username", "payments"],
+        onIncompletePaymentFound
       );
       
       setPurchaseStatus("paying");

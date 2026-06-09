@@ -24,6 +24,7 @@ import CoinDetailModal from "./components/CoinDetailModal";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import SettingsModal from "./components/SettingsModal";
+import PiDeveloperSandbox from "./components/PiDeveloperSandbox";
 
 const STATIC_COINS: CoinPriceInfo[] = [
   { symbol: "PI", name: "Pi Network", category: "Utility / Network Coin", price: 41.25, change24h: 1.45, marketCap: 0, volume24h: 3521040, lastUpdated: new Date().toISOString() },
@@ -74,17 +75,38 @@ export default function App() {
       }
 
       console.log("[Pi Auth] Initializing Pi SDK...");
+      const isSandboxMode = window.location.search.includes("sandbox=true") || 
+                             window.location.search.includes("sandbox=1") || 
+                             window.location.hostname.includes("sandbox") ||
+                             !!(document.referrer && document.referrer.includes("sandbox")) ||
+                             true;
+      
       // Treat Pi.init(...) as a Promise; await it fully before calling Pi.authenticate(...)
-      await piSdk.init({ version: "2.0", sandbox: true });
+      await piSdk.init({ version: "2.0", sandbox: isSandboxMode });
 
-      const scopes = ["username"];
-      const onIncompletePaymentFound = (payment: any) => {
-        console.log("[Pi Auth] Incomplete payment found:", payment);
+      const scopes = ["username", "payments"];
+      const onIncompletePaymentFound = async (payment: any) => {
+        console.log("[Pi Auth] Incomplete payment discovered on load:", payment);
+        try {
+          const res = await fetch("/api/pi/complete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              paymentId: payment.identifier,
+              txid: payment.transaction.txid,
+              isSandboxSimulation: isSandboxMode
+            })
+          });
+          const completedData = await res.json();
+          console.log("[Pi Auth] Incomplete payment auto-completed successfully:", completedData);
+        } catch (e) {
+          console.error("[Pi Auth] Incomplete payment auto-completion failure:", e);
+        }
       };
 
-      console.log("[Pi Auth] Authenticating with scope 'username'...");
+      console.log("[Pi Auth] Authenticating with extended scopes:", scopes);
       const auth = await piSdk.authenticate(scopes, onIncompletePaymentFound);
-      console.log("[Pi Auth] Access token received.");
+      console.log("[Pi Auth] Access token received successfully.");
 
       // Verify the returned token with the backend
       const verifyRes = await fetch("/api/pi/signin", {
@@ -413,6 +435,14 @@ export default function App() {
               </div>
             )}
           </div>
+
+          {/* Interactive Pi Network Sandbox Store and Payment Console */}
+          <PiDeveloperSandbox 
+            lang={lang}
+            piUser={piUser}
+            piPrice={piPrice}
+            onRefreshSession={handlePiSignIn}
+          />
 
         </main>
       )}
