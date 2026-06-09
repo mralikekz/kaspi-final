@@ -4,7 +4,8 @@ const getPiApiKey = (): string | undefined => {
          process.env.PI_KEY || 
          process.env.MINEPI_API_KEY || 
          process.env.MINEPI_KEY || 
-         process.env.MINEPI_SERVER_KEY;
+         process.env.MINEPI_SERVER_KEY ||
+         "akzcrcxf9gkkb3xbe2kxskkkc1x46khrgqk6u8iqs61fl5iefe1zxjhm4tvekt6m";
 };
 
 export default async function handler(req: any, res: any) {
