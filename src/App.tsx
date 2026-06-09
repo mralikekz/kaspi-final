@@ -51,6 +51,73 @@ export default function App() {
   const [source, setSource] = useState("local_cache_simulation");
   const [error, setError] = useState<string | null>(null);
 
+  // Pi Auth states
+  const [piUser, setPiUser] = useState<any | null>(() => {
+    try {
+      const saved = localStorage.getItem("pi_user");
+      return saved ? JSON.parse(saved) : null;
+    } catch (_) {
+      return null;
+    }
+  });
+  const [authLoading, setAuthLoading] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const handlePiSignIn = async () => {
+    if (authLoading) return;
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const piSdk = (window as any).Pi;
+      if (!piSdk) {
+        throw new Error("Pi SDK is not loaded. Please access this app within the Pi Browser.");
+      }
+
+      console.log("[Pi Auth] Initializing Pi SDK...");
+      // Treat Pi.init(...) as a Promise; await it fully before calling Pi.authenticate(...)
+      await piSdk.init({ version: "2.0", sandbox: true });
+
+      const scopes = ["username"];
+      const onIncompletePaymentFound = (payment: any) => {
+        console.log("[Pi Auth] Incomplete payment found:", payment);
+      };
+
+      console.log("[Pi Auth] Authenticating with scope 'username'...");
+      const auth = await piSdk.authenticate(scopes, onIncompletePaymentFound);
+      console.log("[Pi Auth] Access token received.");
+
+      // Verify the returned token with the backend
+      const verifyRes = await fetch("/api/pi/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken: auth.accessToken })
+      });
+
+      if (!verifyRes.ok) {
+        throw new Error(`Auth verification failed. Server responded with status ${verifyRes.status}`);
+      }
+
+      const valData = await verifyRes.json();
+      if (valData.success && valData.user) {
+        setPiUser(valData.user);
+        localStorage.setItem("pi_user", JSON.stringify(valData.user));
+        console.log("[Pi Auth] Session successfully established for @", valData.user.username);
+      } else {
+        throw new Error(valData.error || "Token verification returned empty result");
+      }
+    } catch (err: any) {
+      console.error("[Pi Auth] Error during login:", err);
+      setAuthError(err.message || String(err));
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Automatically trigger Pi authentication when the app loads
+  useEffect(() => {
+    handlePiSignIn();
+  }, []);
+
   // Router listener to capture back/forward navigation in Pi Browser / sandbox
   useEffect(() => {
     const handlePopState = () => {
@@ -201,6 +268,9 @@ export default function App() {
         lang={lang}
         setLang={setLang}
         onHomeClick={() => setIsSettingsOpen(true)}
+        piUser={piUser}
+        onSignIn={handlePiSignIn}
+        authLoading={authLoading}
       />
 
       {currentPath === "/privacy" ? (
@@ -253,7 +323,7 @@ export default function App() {
                     </span>
                     <span className="text-[10px] font-semibold text-slate-100 flex items-center gap-1 font-sans">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      CMC {source === "coinmarketcap" ? "(Live)" : "(Fallback / Cache)"}
+                      API {source === "coinmarketcap" ? "(Live)" : "(Fallback / Cache)"}
                     </span>
                   </div>
                 </div>

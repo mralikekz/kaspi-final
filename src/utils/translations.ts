@@ -77,13 +77,13 @@ export const TRANSLATIONS: Record<string, Record<KaspiLang, string>> = {
     ES: "Portal KASPI activo"
   },
   welcomeText: {
-    RU: "Отслеживайте актуальные биржевые цены ключевых криптовалют напрямую из актуальных котировок CoinMarketCap. Конвертируйте стоимость активов сразу в токены Pi.",
-    EN: "Track real-time market prices of benchmark cryptocurrencies sourced directly from active CoinMarketCap feeds. Convert valuations instantly into Pi utility tokens.",
-    ZH: "直接从 CoinMarketCap 实时行情中追踪关键加密货币的市场价格。瞬间将资产价值换算为 Pi 实用代币。",
-    FR: "Suivez les prix du marché en temps réel des principales crypto-monnaies directement depuis CoinMarketCap. Convertissez instantanément les valeurs en jetons Pi.",
-    AR: "تتبع أسعار السوق الفورية للعملات المشفرة الرئيسية مباشرة من CoinMarketCap. قم بتحويل قيمة الأصول على الفور إلى رموز Pi.",
-    HI: "CoinMarketCap से सीधे प्रमुख क्रिप्टोकरेंसी की वास्तविक समय की बाजार कीमतों को ट्रैक करें। परिसंपत्तियों के मूल्य को तुरंत Pi उपयोगिता टोकन में परिवर्तित करें।",
-    ES: "Siga los precios de mercado en tiempo real de las principales criptomonedas directamente desde CoinMarketCap. Convierta el valor de los activos al instante en tokens Pi."
+    RU: "Отслеживайте актуальные биржевые цены ключевых криптовалют напрямую из актуальных котировок. Конвертируйте стоимость активов сразу в токены Pi.",
+    EN: "Track real-time market prices of benchmark cryptocurrencies sourced directly from active feeds. Convert valuations instantly into Pi utility tokens.",
+    ZH: "直接从实时行情中追踪关键加密货币的市场价格。瞬间将资产价值换算为 Pi 实用代币。",
+    FR: "Suivez les prix du marché en temps réel des principales crypto-monnaies directement depuis les flux actifs. Convertissez instantanément les valeurs en jetons Pi.",
+    AR: "تتبع أسعار السوق الفورية للعملات المشفرة الرئيسية مباشرة. قم بتحويل قيمة الأصول على الفور إلى رموز Pi.",
+    HI: "सीधे प्रमुख क्रिप्टोकरेंसी की वास्तविक समय की बाजार कीमतों को ट्रैक करें। परिसंपत्तियों के मूल्य को तुरंत Pi उपयोगिता टोकн में परिवर्तित करें।",
+    ES: "Siga los precios de mercado en tiempo real de las principales criptomonedas directamente desde los flujos activos. Convierta el valor de los activos al instante en tokens Pi."
   },
   basePiRate: {
     RU: "Базовый курс Pi",
@@ -133,13 +133,13 @@ export const TRANSLATIONS: Record<string, Record<KaspiLang, string>> = {
     ES: "Monedas mostradas: {count}"
   },
   resolvingRates: {
-    RU: "Загрузка актуальных котировок из CoinMarketCap...",
-    EN: "Resolving real rates from CoinMarketCap API...",
-    ZH: "正在从 CoinMarketCap API 加载最新行情...",
-    FR: "Chargement des cotations en direct depuis CoinMarketCap...",
-    AR: "جاري تحميل أسعار الصرف الحية من CoinMarketCap...",
-    HI: "CoinMarketCap API से लाइव दरें लोड की जा रही हैं...",
-    ES: "Cargando cotizaciones en vivo desde la API de CoinMarketCap..."
+    RU: "Загрузка актуальных котировок...",
+    EN: "Resolving real rates from global feeds...",
+    ZH: "正在加载最新行情...",
+    FR: "Chargement des cotations en direct...",
+    AR: "جاري تحميل أسعار الصرف الحية...",
+    HI: "लाइव दरें लोड की जा रही हैं...",
+    ES: "Cargando cotizaciones en vivo..."
   },
   noCoinsFound: {
     RU: "Монеты не найдены. Попробуйте изменить поисковый запрос.",
@@ -209,22 +209,22 @@ export const TRANSLATIONS: Record<string, Record<KaspiLang, string>> = {
     ES: "Este servicio funciona como una aplicación web portátil (Pi App) diseñada específicamente para ejecutarse dentro de Pi Browser. KASPI permite analizar rápidamente el valor de las principales criptomonedas globales en tiempo real. Seleccione cualquier activo en la lista para ver descripciones detalladas y conversiones de cambio."
   },
   cmcIntegrationTitle: {
-    RU: "Интеграция с CoinMarketCap",
-    EN: "CoinMarketCap Integration",
-    ZH: "CoinMarketCap 整合数据",
-    FR: "Intégration CoinMarketCap",
-    AR: "التكامل مع CoinMarketCap",
-    HI: "CoinMarketCap एकीकरण",
-    ES: "Integración con CoinMarketCap"
+    RU: "Интеграция с рыночными индексами",
+    EN: "Market Feed Integration",
+    ZH: "全球行情数据集成",
+    FR: "Intégration des cotations de marché",
+    AR: "التكامل مع أسعار المشفرة",
+    HI: "बाज़ार डेटा एकीकरण",
+    ES: "Integración de Datos de Mercado"
   },
   cmcIntegrationDesc: {
-    RU: "Все котировки в системе синхронизируются в реальном времени напрямую через API CoinMarketCap и CoinGecko, гарантируя надлежащую точность расчетов для пользовательского баланса.",
-    EN: "All pricing values are synced in real-time through high-performance endpoints connected to the CoinMarketCap and CoinGecko feeds to provide maximum accuracy in standard valuations and conversions.",
-    ZH: "系统中的所有报价直接通过 CoinMarketCap 和 CoinGecko API 进行实时同步，为用户的资产计算提供最大的汇率精准度保障。",
-    FR: "Toutes les valeurs de prix sont synchronisées en temps réel via des APIs connectées à CoinMarketCap et CoinGecko pour assurer une précision maximale pour le solde des utilisateurs.",
-    AR: "يتم مزامنة جميع عروض الأسعار في النظام في الوقت الفعلي مباشرة من خلال واجهات برمجة تطبيقات CoinMarketCap و CoinGecko لضمان أقصى قدر من الدقة في حسابات المستخدمين.",
-    HI: "सिस्टम में सभी मूल्य वास्तविक समय में सीधे CoinMarketCap और CoinGecko API के माध्यम से सिंक्रनाइज़ किए जाते हैं ताकि रूपांतरणों में अधिकतम सटीकता सुनिश्चित की जा सके।",
-    ES: "Todas las cotizaciones se sincronizan en tiempo real directamente a través de las API de CoinMarketCap y CoinGecko para garantizar la máxima precisión en las valoraciones y conversiones."
+    RU: "Все котировки в системе синхронизируются в реальном времени напрямую через агрегированные API, гарантируя надлежащую точность расчетов для пользовательского баланса.",
+    EN: "All pricing values are synced in real-time through high-performance endpoints connected to public global feeds to provide maximum accuracy in standard valuations and conversions.",
+    ZH: "系统中的所有报价直接通过聚合 API 进行实时同步，为用户的资产计算提供最大的汇率精准度保障。",
+    FR: "Toutes les valeurs de prix sont synchronisées en temps réel via des APIs connectées aux flux mondiaux pour assurer une précision maximale pour le solde des utilisateurs.",
+    AR: "يتم مزامنة جميع عروض الأسعار في النظام في الوقت الفعلي مباشرة من خلال واجهات برمجة تطبيقات مجمعة لضمان أقصى قدر من الدقة في حسابات المستخدمين.",
+    HI: "रूपांतरणों में अधिकतम सटीकता सुनिश्चित करने के लिए सभी मूल्य वास्तविक समय में सीधे वैश्विक API के माध्यम से सिंक्रनाइज़ किए जाते हैं।",
+    ES: "Todas las cotizaciones se sincronizan en tiempo real directamente a través de las API globales para garantizar la máxima precisión en las valoraciones y conversiones."
   },
   copyrightText: {
     RU: "© 2026 KASPI. Все права защищены.",

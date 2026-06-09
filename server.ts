@@ -512,6 +512,35 @@ app.get("/api/pi/status", (req, res) => {
   });
 });
 
+app.post("/api/pi/signin", async (req, res) => {
+  const { accessToken } = req.body;
+  if (!accessToken) {
+    return res.status(400).json({ success: false, error: "Missing accessToken parameter" });
+  }
+
+  try {
+    logPiEvent("signin", "AUTH", "info", "Validating user authentication token");
+    const apiRes = await fetch("https://api.minepi.com/v2/me", {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`
+      }
+    });
+
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      logPiEvent("signin", "AUTH", "success", `User validated: ${data.username}`);
+      return res.json({ success: true, user: data });
+    } else {
+      const errText = await apiRes.text();
+      logPiEvent("signin", "AUTH", "error", `User validation failed with status ${apiRes.status}: ${errText}`);
+      return res.status(apiRes.status).json({ success: false, error: "Token validation failed", details: errText });
+    }
+  } catch (err: any) {
+    logPiEvent("signin", "AUTH", "error", `Exception during validation: ${err.message}`);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 4. Pi payment server-side approval flow
 app.post("/api/pi/approve", async (req, res) => {
   const { paymentId, isSandboxSimulation } = req.body;

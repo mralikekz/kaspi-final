@@ -315,7 +315,7 @@ export default function SettingsModal({
                     </p>
                   </div>
 
-                  {/* Block 2: CoinMarketCap Integration */}
+                  {/* Block 2: Market API Integration */}
                   <div className="rounded-2xl bg-white border border-slate-100/90 p-4.5 w-full hover:border-slate-200 dark:bg-zinc-900/30 dark:border-zinc-900/80 transition-all shadow-xs">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="h-7 w-7 rounded-lg bg-amber-100/60 dark:bg-amber-950/20 flex items-center justify-center text-amber-500 dark:text-amber-400">

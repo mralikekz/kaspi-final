@@ -15,6 +15,9 @@ interface HeaderProps {
   lang: KaspiLang;
   setLang: (val: KaspiLang) => void;
   onHomeClick?: () => void;
+  piUser: any | null;
+  onSignIn: () => void;
+  authLoading: boolean;
 }
 
 export default function Header({
@@ -28,7 +31,10 @@ export default function Header({
   refreshing,
   lang,
   setLang,
-  onHomeClick
+  onHomeClick,
+  piUser,
+  onSignIn,
+  authLoading
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-100 bg-white/95 backdrop-blur-md dark:bg-zinc-950/95 dark:border-zinc-900 transition-colors duration-300">
@@ -84,6 +90,30 @@ export default function Header({
 
           {/* Dynamic Configuration Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
+            
+            {/* Pi Authentication Status */}
+            {piUser ? (
+              <div className="flex items-center gap-1.5 px-2.5 h-9 rounded-xl bg-purple-50 border border-purple-150 text-purple-700 dark:bg-purple-950/30 dark:border-purple-900/60 dark:text-purple-400 text-[10px] font-black tracking-wide">
+                <div className="h-4.5 w-4.5 rounded-full bg-purple-200 text-purple-800 dark:bg-purple-900/80 dark:text-purple-300 flex items-center justify-center font-bold text-[8px] uppercase">
+                  {piUser.username?.charAt(0) || "P"}
+                </div>
+                <span className="max-w-[70px] truncate sm:max-w-[120px]">@{piUser.username}</span>
+              </div>
+            ) : (
+              <button
+                onClick={onSignIn}
+                disabled={authLoading}
+                className="px-2.5 sm:px-3 h-9 rounded-xl text-[10px] font-bold text-white bg-purple-650 hover:bg-purple-700 active:scale-95 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50 select-none"
+                title={lang === "RU" ? "Войти через Pi Network" : "Sign in using Pi Network"}
+              >
+                {authLoading ? (
+                  <span className="h-3 w-3 rounded-full border border-white border-t-transparent animate-spin inline-block shrink-0" />
+                ) : (
+                  <span className="font-serif">π</span>
+                )}
+                <span>{lang === "RU" ? "Войти с Pi" : "Pi Sign In"}</span>
+              </button>
+            )}
             
             {/* Language switcher select */}
             <div className="relative">

@@ -357,37 +357,37 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
                     <p className="leading-relaxed font-sans">
                       {lang === "RU" ? (
                         <>
-                          Удобная конвертация активов. Калькулятор использует актуальные рыночные оценки от <strong>CoinMarketCap</strong>. 
+                          Удобная конвертация активов. Калькулятор использует актуальные рыночные оценки. 
                           Пары преобразуются на основе текущего курса к базовому токену <strong>Pi Network (PI)</strong> (${piPrice.toFixed(2)} USD).
                         </>
                       ) : lang === "ZH" ? (
                         <>
-                          便捷的资产换算。此计算器基于 <strong>CoinMarketCap</strong> 的最新市场评估。
+                          便捷的资产换算。此计算器基于最新市场换算及评估。
                           转换比例基于当前对基础代币 <strong>Pi Network (PI)</strong> (${piPrice.toFixed(2)} USD) 的实时汇率。
                         </>
                       ) : lang === "FR" ? (
                         <>
-                          Conversion pratique d'actifs. La calculatrice utilise les évaluations de marché de <strong>CoinMarketCap</strong>.
+                          Conversion pratique d'actifs. La calculatrice utilise les évaluations de marché actives.
                           Les paires sont converties sur la base du taux de change actuel par rapport au jeton de base <strong>Pi Network (PI)</strong> (${piPrice.toFixed(2)} USD).
                         </>
                       ) : lang === "AR" ? (
                         <>
-                          تحويل سهل للأصول. تستخدم الحاسبة أسعار السوق النشطة من <strong>CoinMarketCap</strong>.
-                          يتم تحويل الأزواج بناءً على السعر الحالي مقابل العملة الأساسية لشبكة <strong>Pi Network (PI)</strong> (${piPrice.toFixed(2)} USD).
+                          تحويل سهل للأصول. تستخدم الحاسبة أسعار السوق النشطة لمختلف العملات.
+                          يتم تحويل الأزواج بناءً на السعر الحالي مقابل العملة الأساسية لشبكة <strong>Pi Network (PI)</strong> (${piPrice.toFixed(2)} USD).
                         </>
                       ) : lang === "HI" ? (
                         <>
-                          सुविधाजनक संपत्ति रूपांतरण। यह कैलकुलेटर <strong>CoinMarketCap</strong> के लाइव बाजार मूल्यों का उपयोग करता है।
+                          सुविधाजनक संपत्ति रूपांतरण। यह कैलकुलेटर लाइव बाजार मूल्यों का उपयोग करता है।
                           ट्रेडिंग जोड़े आधार उपयोगिता परिसंपत्ति <strong>Pi Network (PI)</strong> (${piPrice.toFixed(2)} USD) के खिलाफ लाइव दर पर परिवर्तित होते हैं।
                         </>
                       ) : lang === "ES" ? (
                         <>
-                          Conversión de activos sencilla. La calculadora refleja las evaluaciones activas del mercado de <strong>CoinMarketCap</strong>.
+                          Conversión de activos sencilla. La calculadora refleja las evaluaciones activas del mercado.
                           Los pares se convierten basándose en el tipo de cambio actual con el activo base de <strong>Pi Network (PI)</strong> (${piPrice.toFixed(2)} USD).
                         </>
                       ) : (
                         <>
-                          Real-time asset conversion. The calculator reflects active market evaluations from <strong>CoinMarketCap</strong>. 
+                          Real-time asset conversion. The calculator reflects active market evaluations. 
                           Trading pairs are converted using the live exchange rate against the base utility asset <strong>Pi Network (PI)</strong> (${piPrice.toFixed(2)} USD).
                         </>
                       )}
@@ -523,7 +523,7 @@ export default function CoinDetailModal({ coin, piPrice, onClose, lang }: CoinDe
                   <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 text-xs space-y-2 mt-4 text-slate-500 dark:text-zinc-400">
                     <div className="flex justify-between items-center">
                       <span>{getTranslation("quotingService", lang)}</span>
-                      <span className="font-semibold text-slate-700 dark:text-zinc-300 uppercase">CoinMarketCap API</span>
+                      <span className="font-semibold text-slate-700 dark:text-zinc-300 uppercase">Market API</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>{getTranslation("lastUpdatedLabel", lang)}</span>

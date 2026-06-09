@@ -1,6 +1,6 @@
 {
   "name": "KASPI",
-  "description": "Real-time cryptocurrency rate tracker designed for Pi Network with CoinMarketCap integration, detailed information, and light/dark theme switcher.",
+  "description": "Real-time cryptocurrency rate tracker designed for Pi Network with live price integration, detailed information, and light/dark theme switcher.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
