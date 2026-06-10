@@ -53,7 +53,7 @@ const COIN_METADATA = [
   { symbol: "ETH", name: "Ethereum", geckoId: "ethereum", category: "Smart Contracts" },
   { symbol: "XRP", name: "XRP", geckoId: "ripple", category: "Cross-border Payments" },
   { symbol: "HBAR", name: "Hedera", geckoId: "hedera-hashgraph", category: "Enterprise Ledger" },
-  { symbol: "ZYPTO", name: "Zypto", geckoId: "zypto", category: "Crypto Payments Ecosystem" },
+  { symbol: "ZYPTO", name: "Zypto", geckoId: "zypto-token", category: "Crypto Payments Ecosystem" },
   { symbol: "XLM", name: "Stellar", geckoId: "stellar", category: "DeFi / Payments" },
   { symbol: "BNB", name: "BNB", geckoId: "binancecoin", category: "Exchange Token / L1" },
   { symbol: "TON", name: "TON", geckoId: "the-open-network", category: "Telegram Ecosystem" },
@@ -89,7 +89,7 @@ export const getStaticMaxSupply = (symbol: string): number | null => {
     case "HBAR": return 50000000000;
     case "ONDO": return 10000000000;
     case "TWT": return 1000000000;
-    case "ZYPTO": return 100000000;
+    case "ZYPTO": return 1000000000;
     case "PI": return 100000000000;
     default: return null;
   }
@@ -106,7 +106,7 @@ export const getStaticCirculatingSupply = (symbol: string): number => {
     case "HBAR": return 35700000000;
     case "ONDO": return 1437142415;
     case "TWT": return 416000000;
-    case "ZYPTO": return 89000000;
+    case "ZYPTO": return 896000000;
     case "PI": return 68000000000;
     default: return 0;
   }
@@ -119,7 +119,7 @@ export const getStaticPrice = (symbol: string): number => {
     case "ETH": return 2740.15;
     case "XRP": return 1.15;
     case "HBAR": return 0.125;
-    case "ZYPTO": return 0.0185;
+    case "ZYPTO": return 0.0264;
     case "XLM": return 0.222;
     case "BNB": return 582.40;
     case "TON": return 5.12;
@@ -153,7 +153,7 @@ export const getStaticMarketCap = (symbol: string): number => {
     case "ETH": return 329100500600;
     case "XRP": return 65000210340;
     case "HBAR": return 4250100200;
-    case "ZYPTO": return 18500120;
+    case "ZYPTO": return 23654400;
     case "XLM": return 6450120300;
     case "BNB": return 85210040500;
     case "TON": return 12900410200;
@@ -170,7 +170,7 @@ export const getStaticVolume24h = (symbol: string): number => {
     case "ETH": return 14500100200;
     case "XRP": return 1200150200;
     case "HBAR": return 152010400;
-    case "ZYPTO": return 345100;
+    case "ZYPTO": return 580000;
     case "XLM": return 230100500;
     case "BNB": return 980120300;
     case "TON": return 185040300;
@@ -296,7 +296,7 @@ app.get("/api/crypto", async (req, res) => {
       case "ETH": priceBySymbol = 2740.15; changeBySymbol = 0.85; capBySymbol = 329100500600; volBySymbol = 14500100200; break;
       case "XRP": priceBySymbol = 1.15; changeBySymbol = -2.41; capBySymbol = 65000210340; volBySymbol = 1200150200; break;
       case "HBAR": priceBySymbol = 0.125; changeBySymbol = 4.21; capBySymbol = 4250100200; volBySymbol = 152010400; break;
-      case "ZYPTO": priceBySymbol = 0.0185; changeBySymbol = -3.15; capBySymbol = 18500120; volBySymbol = 345100; break;
+      case "ZYPTO": priceBySymbol = 0.0264; changeBySymbol = -3.15; capBySymbol = 23654400; volBySymbol = 580000; break;
       case "XLM": priceBySymbol = 0.222; changeBySymbol = 0.52; capBySymbol = 6450120300; volBySymbol = 230100500; break;
       case "BNB": priceBySymbol = 582.40; changeBySymbol = -0.45; capBySymbol = 85210040500; volBySymbol = 980120300; break;
       case "TON": priceBySymbol = 5.12; changeBySymbol = 2.18; capBySymbol = 12900410200; volBySymbol = 185040300; break;

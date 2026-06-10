@@ -31,7 +31,7 @@ const STATIC_COINS: CoinPriceInfo[] = [
   { symbol: "ETH", name: "Ethereum", category: "Smart Contracts", price: 2740.15, change24h: 0.85, marketCap: 329100500600, volume24h: 14500100200, lastUpdated: new Date().toISOString() },
   { symbol: "XRP", name: "XRP", category: "Cross-border Payments", price: 1.15, change24h: -2.41, marketCap: 65000210340, volume24h: 1200150200, lastUpdated: new Date().toISOString() },
   { symbol: "HBAR", name: "Hedera", category: "Enterprise Ledger", price: 0.125, change24h: 4.21, marketCap: 4250100200, volume24h: 152010400, lastUpdated: new Date().toISOString() },
-  { symbol: "ZYPTO", name: "Zypto", category: "Crypto Payments Ecosystem", price: 0.0185, change24h: -3.15, marketCap: 18500120, volume24h: 345100, lastUpdated: new Date().toISOString() },
+  { symbol: "ZYPTO", name: "Zypto", category: "Crypto Payments Ecosystem", price: 0.0264, change24h: -3.15, marketCap: 23654400, volume24h: 580000, lastUpdated: new Date().toISOString() },
   { symbol: "XLM", name: "Stellar", category: "DeFi / Payments", price: 0.222, change24h: 0.52, marketCap: 6450120300, volume24h: 230100500, lastUpdated: new Date().toISOString() },
   { symbol: "BNB", name: "BNB", category: "Exchange Token / L1", price: 582.40, change24h: -0.45, marketCap: 85210040500, volume24h: 980120300, lastUpdated: new Date().toISOString() },
   { symbol: "TON", name: "TON", category: "Telegram Ecosystem", price: 5.12, change24h: 2.18, marketCap: 12900410200, volume24h: 185040300, lastUpdated: new Date().toISOString() },
